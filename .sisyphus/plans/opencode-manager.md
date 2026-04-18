@@ -1060,7 +1060,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
 
   **Commit**: NO (groups with Wave 3)
 
-- [ ] 11. OpenCode Config Editor Page (opencode.json)
+- [x] 11. OpenCode Config Editor Page (opencode.json)
 
   **What to do**:
   - Create `src/renderer/src/pages/OpenCodeConfigPage.tsx`:
@@ -1135,7 +1135,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   - Message: `feat(editor): add OpenCode config editor with provider/model/permission management`
   - Files: `src/renderer/src/pages/OpenCodeConfigPage.tsx`
 
-- [ ] 12. Agent Config Editor Page (oh-my-openagent.json)
+- [x] 12. Agent Config Editor Page (oh-my-openagent.json)
 
   **What to do**:
   - Create `src/renderer/src/pages/AgentConfigPage.tsx`:
@@ -1211,7 +1211,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   - Message: `feat(editor): add Agent config editor for oh-my-openagent.json`
   - Files: `src/renderer/src/pages/AgentConfigPage.tsx`
 
-- [ ] 13. Plugin Manager Page
+- [x] 13. Plugin Manager Page
 
   **What to do**:
   - Create `src/renderer/src/pages/PluginsPage.tsx` with:
@@ -1252,7 +1252,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
 
   **Commit**: NO (groups with Wave 3)
 
-- [ ] 14. Skill Manager Page
+- [x] 14. Skill Manager Page
 
   **What to do**:
   - Create `src/main/services/skill-service.ts`: listSkills (scan for .md files), readSkill, writeSkill, deleteSkill, createSkill
@@ -1295,7 +1295,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
 
   **Commit**: NO (groups with Wave 3)
 
-- [ ] 15. Settings Page
+- [x] 15. Settings Page
 
   **What to do**:
   - Create `src/renderer/src/pages/SettingsPage.tsx`:
@@ -1336,7 +1336,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   - Message: `feat(pages): add Plugin Manager, Skill Manager, and Settings pages`
   - Files: `src/renderer/src/pages/PluginsPage.tsx`, `src/renderer/src/pages/SkillsPage.tsx`, `src/renderer/src/pages/SettingsPage.tsx`, `src/main/services/skill-service.ts`, `src/main/ipc/skill-ipc.ts`
 
-- [ ] 16. Integrated Terminal (xterm.js + node-pty + IPC)
+- [x] 16. Integrated Terminal (xterm.js + node-pty + IPC)
 
   **What to do**:
   - Install and configure `xterm`, `@xterm/addon-fit`, `node-pty` (native module — needs electron-rebuild)
@@ -1392,7 +1392,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   - Message: `feat(terminal): add integrated terminal with xterm.js and multi-shell support`
   - Files: `src/main/services/terminal-service.ts`, `src/main/ipc/terminal-ipc.ts`, `src/renderer/src/components/Terminal/*`
 
-- [ ] 17. Backup & Restore System
+- [x] 17. Backup & Restore System
 
   **What to do**:
   - Create `src/main/services/backup-service.ts`:
@@ -1432,7 +1432,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
 
   **Commit**: NO (groups with Wave 4)
 
-- [ ] 18. File Browser & Project Auto-Detection
+- [x] 18. File Browser & Project Auto-Detection
 
   **What to do**:
   - Create `src/main/services/project-service.ts`:
@@ -1473,7 +1473,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
 
   **Commit**: NO (groups with Wave 4)
 
-- [ ] 19. JSON Preview Panel (Live Preview with Syntax Highlighting)
+- [x] 19. JSON Preview Panel (Live Preview with Syntax Highlighting)
 
   **What to do**:
   - Enhance `src/renderer/src/components/ui/JsonEditor.tsx` (from Task 9):
@@ -1517,7 +1517,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
   - Message: `feat(advanced): add terminal, backup/restore, project detection, JSON preview`
   - Files: Terminal/*, backup-service.ts, project-service.ts, JsonPreviewPanel.tsx
 
-- [ ] 20. Cross-Page Integration (Dashboard reads from all stores)
+- [x] 20. Cross-Page Integration (Dashboard reads from all stores)
 
   **What to do**:
   - Wire Dashboard to real data from all stores (replace any mock data)
@@ -1546,7 +1546,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
 
   **Commit**: NO (groups with Wave 5)
 
-- [ ] 21. Error Handling & Toast Notifications
+- [x] 21. Error Handling & Toast Notifications
 
   **What to do**:
   - Create global error boundary component wrapping the app
@@ -1567,7 +1567,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
 
   **Commit**: NO (groups with Wave 5)
 
-- [ ] 22. Window Chrome (Title Bar, Menu, Tray)
+- [x] 22. Window Chrome (Title Bar, Menu, Tray)
 
   **What to do**:
   - Configure custom title bar (frameless window with custom drag region)
@@ -1588,7 +1588,7 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
 
   **Commit**: NO (groups with Wave 5)
 
-- [ ] 23. Final Build Config (electron-builder, Icons, Metadata)
+- [x] 23. Final Build Config (electron-builder, Icons, Metadata)
 
   **What to do**:
   - Configure electron-builder in package.json for Windows build:
@@ -1629,19 +1629,19 @@ Wave FINAL (After ALL tasks — 4 parallel reviews, then user okay):
 
 > 4 review agents run in PARALLEL. ALL must APPROVE. Present consolidated results to user and get explicit "okay" before completing.
 
-- [ ] F1. **Plan Compliance Audit** — `oracle`
+- [x] F1. **Plan Compliance Audit** — `oracle`
   Read the plan end-to-end. For each "Must Have": verify implementation exists (read file, run command). For each "Must NOT Have": search codebase for forbidden patterns — reject with file:line if found. Check evidence files exist in .sisyphus/evidence/. Compare deliverables against plan.
   Output: `Must Have [N/N] | Must NOT Have [N/N] | Tasks [N/N] | VERDICT: APPROVE/REJECT`
 
-- [ ] F2. **Code Quality Review** — `unspecified-high`
+- [x] F2. **Code Quality Review** — `unspecified-high`
   Run `npx tsc --noEmit` + lint. Review all changed files for: `as any`/`@ts-ignore`, empty catches, console.log in prod, commented-out code, unused imports. Check AI slop: excessive comments, over-abstraction, generic names.
   Output: `Build [PASS/FAIL] | Lint [PASS/FAIL] | Files [N clean/N issues] | VERDICT`
 
-- [ ] F3. **Real Manual QA** — `unspecified-high` (+ `playwright` skill)
+- [x] F3. **Real Manual QA** — `unspecified-high` (+ `playwright` skill)
   Start from clean state (`npm install && npm run dev`). Execute EVERY QA scenario from EVERY task. Test cross-page navigation, config load/save cycle, plugin install/uninstall, terminal open/type, backup/restore round-trip. Save to `.sisyphus/evidence/final-qa/`.
   Output: `Scenarios [N/N pass] | Integration [N/N] | Edge Cases [N tested] | VERDICT`
 
-- [ ] F4. **Scope Fidelity Check** — `deep`
+- [x] F4. **Scope Fidelity Check** — `deep`
   For each task: read "What to do", read actual code. Verify 1:1 — everything in spec was built, nothing beyond spec was built. Check "Must NOT do" compliance. Flag unaccounted changes.
   Output: `Tasks [N/N compliant] | Contamination [CLEAN/N issues] | Unaccounted [CLEAN/N files] | VERDICT`
 

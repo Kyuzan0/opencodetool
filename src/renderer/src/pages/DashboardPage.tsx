@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useConfigStore, usePluginStore, useSkillStore, useSettingsStore } from '../stores'
+import { useConfigStore, usePluginStore, useSkillStore, useSettingsStore, useUiStore } from '../stores'
 import { Card, Button } from '../components/ui'
-import { FileJson, Bot, Puzzle, Wand2, RefreshCw, FolderOpen, CheckCircle, XCircle, Package } from 'lucide-react'
+import BackupDialog from '../components/BackupRestore/BackupDialog'
+import { FileJson, Bot, Puzzle, Wand2, RefreshCw, FolderOpen, CheckCircle, XCircle, Package, Archive, Terminal } from 'lucide-react'
 
 export default function DashboardPage(): JSX.Element {
   const navigate = useNavigate()
@@ -11,6 +12,8 @@ export default function DashboardPage(): JSX.Element {
   const { skills } = useSkillStore()
   const { recentProjects } = useSettingsStore()
   const [pmInfo, setPmInfo] = useState<{ preferred: string; version: string } | null>(null)
+  const [backupMode, setBackupMode] = useState<'backup' | 'restore' | null>(null)
+  const { toggleTerminal } = useUiStore()
 
   useEffect(() => {
     loadConfigLocations()
@@ -91,9 +94,12 @@ export default function DashboardPage(): JSX.Element {
           <Button variant="secondary" onClick={() => navigate('/opencode-config')}><FileJson size={16} /> Open Config</Button>
           <Button variant="secondary" onClick={() => navigate('/plugins')}><Puzzle size={16} /> Manage Plugins</Button>
           <Button variant="secondary" onClick={() => navigate('/agent-config')}><Bot size={16} /> Agent Config</Button>
+          <Button variant="secondary" onClick={() => toggleTerminal()}><Terminal size={16} /> Terminal</Button>
+          <Button variant="secondary" onClick={() => setBackupMode('backup')}><Archive size={16} /> Backup</Button>
           <Button variant="secondary" onClick={() => loadConfigLocations()}><RefreshCw size={16} /> Reload</Button>
         </div>
       </Card>
+      {backupMode && <BackupDialog open={!!backupMode} onClose={() => setBackupMode(null)} mode={backupMode} />}
       {recentProjects.length > 0 && (
         <Card title="Recent Projects">
           <div className="space-y-2">
