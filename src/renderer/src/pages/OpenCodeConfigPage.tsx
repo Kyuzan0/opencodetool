@@ -141,6 +141,21 @@ export default function OpenCodeConfigPage(): JSX.Element {
     setAddProvOpen(false)
   }
 
+  function renameProvider(oldKey: string, newKey: string): void {
+    if (!openCodeConfig?.provider || !newKey.trim() || newKey === oldKey) return
+    const trimmed = newKey.trim()
+    if (/\s/.test(trimmed)) return
+    if (openCodeConfig.provider[trimmed] && trimmed !== oldKey) return
+    const entries = Object.entries(openCodeConfig.provider)
+    const newProvider: Record<string, any> = {}
+    for (const [k, v] of entries) {
+      newProvider[k === oldKey ? trimmed : k] = v
+    }
+    setOpenCodeConfig({ ...openCodeConfig, provider: newProvider })
+    setDirty(true)
+    if (selProv === oldKey) setSelProv(trimmed)
+  }
+
   function removeProvider(name: string): void {
     if (!openCodeConfig?.provider) return
     const { [name]: _, ...rest } = openCodeConfig.provider
@@ -201,7 +216,8 @@ export default function OpenCodeConfigPage(): JSX.Element {
             {Object.entries(openCodeConfig.provider || {}).map(([name, prov]) => (
               <Card key={name} title={name} description={prov.npm || prov.options?.baseURL || ''} collapsible defaultCollapsed>
                 <div className="space-y-3 pt-2">
-                  <TextInput label="Name" value={prov.name || name} onChange={(v) => upf(name, 'name', v)} />
+                  <TextInput label="Provider Key" value={name} onChange={(v) => renameProvider(name, v)} description="Unique identifier used as the JSON key. No spaces allowed." />
+                  <TextInput label="Display Name" value={prov.name || name} onChange={(v) => upf(name, 'name', v)} />
                   <TextInput label="NPM Package" value={prov.npm || ''} onChange={(v) => upf(name, 'npm', v)} placeholder="e.g. @ai-sdk/openai" />
                   <TextInput label="Base URL" type="url" value={prov.options?.baseURL || ''} onChange={(v) => {
                     const opts = { ...(prov.options || {}), baseURL: v }
