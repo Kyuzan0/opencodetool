@@ -130,3 +130,11 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
+
+// H3 Fix: Kill all terminal processes before quit
+app.on('before-quit', () => {
+  try {
+    const { destroyAllTerminals } = require('./services/terminal-service')
+    destroyAllTerminals()
+  } catch { /* service may not be loaded */ }
+})

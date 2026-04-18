@@ -16,8 +16,7 @@ export async function detectProjects(searchPaths: string[]): Promise<ProjectInfo
     join(home, 'projects'),
     join(home, 'dev'),
     join(home, 'code'),
-    join(home, 'Documents', 'projects'),
-    'D:\\laragon\\www\\app'
+    join(home, 'Documents', 'projects')
   ]
   for (const d of defaultDirs) {
     if (existsSync(d) && !paths.includes(d)) paths.push(d)

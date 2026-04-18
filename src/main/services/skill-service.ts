@@ -45,15 +45,33 @@ export async function listSkills(skillDir: string): Promise<SkillInfo[]> {
   return skills
 }
 
+function validateSkillPath(filePath: string): void {
+  const resolved = require('path').resolve(filePath)
+  const home = homedir()
+  const allowedPrefixes = [
+    join(home, '.config', 'opencode'),
+    join(home, '.config', 'kilo'),
+    join(home, '.opencode')
+  ]
+  const isAllowed = allowedPrefixes.some((p) => resolved.startsWith(p)) ||
+    (resolved.includes('.opencode') && extname(resolved) === '.md')
+  if (!isAllowed) {
+    throw new Error(`Access denied: path "${filePath}" is outside allowed skill directories`)
+  }
+}
+
 export async function readSkill(filePath: string): Promise<string> {
+  validateSkillPath(filePath)
   return readFile(filePath, 'utf-8')
 }
 
 export async function writeSkill(filePath: string, content: string): Promise<void> {
+  validateSkillPath(filePath)
   await writeFile(filePath, content, 'utf-8')
 }
 
 export async function deleteSkill(filePath: string): Promise<void> {
+  validateSkillPath(filePath)
   await unlink(filePath)
 }
 

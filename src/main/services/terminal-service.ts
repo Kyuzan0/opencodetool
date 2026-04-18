@@ -74,3 +74,14 @@ export function removeTerminalListeners(id: string): void {
   emitter.removeAllListeners(`data:${id}`)
   emitter.removeAllListeners(`exit:${id}`)
 }
+
+export function destroyAllTerminals(): void {
+  for (const [id, term] of terminals) {
+    try {
+      term.process.kill()
+    } catch { /* already dead */ }
+    emitter.removeAllListeners(`data:${id}`)
+    emitter.removeAllListeners(`exit:${id}`)
+  }
+  terminals.clear()
+}

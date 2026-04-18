@@ -93,8 +93,14 @@ export function runCommand(
   cwd?: string,
   timeout = 30000
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+  // Validate args to prevent command injection
+  for (const arg of args) {
+    if (/[;&|`$(){}]/.test(arg)) {
+      return Promise.resolve({ stdout: '', stderr: `Invalid characters in argument: ${arg}`, exitCode: 1 })
+    }
+  }
   return new Promise((resolve, reject) => {
-    const proc = execFile(command, args, { cwd, timeout, shell: true }, (error, stdout, stderr) => {
+    const proc = execFile(command, args, { cwd, timeout, shell: false }, (error, stdout, stderr) => {
       resolve({
         stdout: stdout || '',
         stderr: stderr || '',

@@ -236,8 +236,10 @@ export function mergeConfigs(
 
 function detectFormat(filePath: string, content: string): 'json' | 'jsonc' {
   if (extname(filePath) === '.jsonc') return 'jsonc'
-  // Check for comments in content
-  if (/\/\/.*|\/\*[\s\S]*?\*\//.test(content)) return 'jsonc'
+  // Check for comments outside of string values
+  // Remove all JSON strings first, then check for comments
+  const withoutStrings = content.replace(/"(?:[^"\\]|\\.)*"/g, '""')
+  if (/\/\/.*|\/\*[\s\S]*?\*\//.test(withoutStrings)) return 'jsonc'
   return 'json'
 }
 
