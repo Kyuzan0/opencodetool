@@ -5,6 +5,8 @@ interface CardProps {
   className?: string
   collapsible?: boolean
   defaultCollapsed?: boolean
+  collapsed?: boolean
+  onToggle?: () => void
 }
 
 import { useState } from 'react'
@@ -16,29 +18,42 @@ export default function Card({
   children,
   className = '',
   collapsible = false,
-  defaultCollapsed = false
+  defaultCollapsed = false,
+  collapsed: controlledCollapsed,
+  onToggle
 }: CardProps): JSX.Element {
-  const [collapsed, setCollapsed] = useState(defaultCollapsed)
+  const [internalCollapsed, setInternalCollapsed] = useState(defaultCollapsed)
+  const isControlled = controlledCollapsed !== undefined
+  const isCollapsed = isControlled ? controlledCollapsed : internalCollapsed
+
+  function handleToggle(): void {
+    if (!collapsible) return
+    if (isControlled && onToggle) {
+      onToggle()
+    } else {
+      setInternalCollapsed(!internalCollapsed)
+    }
+  }
 
   return (
     <div className={`card ${className}`}>
       {title && (
         <div
-          className={`flex items-center justify-between ${collapsible ? 'cursor-pointer' : ''} ${collapsed ? '' : 'mb-3'}`}
-          onClick={() => collapsible && setCollapsed(!collapsed)}
+          className={`flex items-center justify-between ${collapsible ? 'cursor-pointer select-none' : ''} ${isCollapsed ? '' : 'mb-3'}`}
+          onClick={handleToggle}
         >
           <div>
-            <h3 className="text-sm font-semibold text-gray-200">{title}</h3>
-            {description && <p className="text-xs text-gray-500">{description}</p>}
+            <h3 className="text-sm font-semibold text-themed">{title}</h3>
+            {description && <p className="text-xs text-themed-muted">{description}</p>}
           </div>
           {collapsible && (
-            <span className="text-gray-500">
-              {collapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+            <span className="text-themed-muted">
+              {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
             </span>
           )}
         </div>
       )}
-      {!collapsed && children}
+      {!isCollapsed && children}
     </div>
   )
 }

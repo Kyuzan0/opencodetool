@@ -27,17 +27,17 @@ export default function Sidebar(): JSX.Element {
 
   return (
     <aside
-      className={`flex h-full flex-col border-r border-border-default bg-sidebar transition-all duration-200 ${
+      className={`flex h-full flex-col border-r border-themed bg-themed-sidebar transition-all duration-200 ${
         sidebarCollapsed ? 'w-16' : 'w-60'
       }`}
     >
-      <div className="flex h-14 items-center justify-between border-b border-border-default px-4">
+      <div className="flex h-14 items-center justify-between border-b border-themed px-4">
         {!sidebarCollapsed && (
-          <span className="text-sm font-semibold text-gray-100">OpenCode Manager</span>
+          <span className="text-sm font-semibold text-themed">OpenCode Manager</span>
         )}
         <button
           onClick={toggleSidebar}
-          className="rounded p-1 text-gray-400 hover:bg-white/10 hover:text-gray-200"
+          className="rounded p-1 text-themed-muted hover:bg-black/10 dark:hover:bg-white/10 hover:text-themed"
         >
           {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
@@ -54,7 +54,7 @@ export default function Sidebar(): JSX.Element {
               className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
                 isActive
                   ? 'bg-accent/20 text-accent'
-                  : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
+                  : 'text-themed-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-themed'
               }`}
               title={sidebarCollapsed ? item.label : undefined}
             >

@@ -41,6 +41,7 @@ export default function OpenCodeConfigPage(): JSX.Element {
   const [addModelOpen, setAddModelOpen] = useState(false)
   const [newModelName, setNewModelName] = useState('')
   const [saveLoading, setSaveLoading] = useState(false)
+  const [expandedProviders, setExpandedProviders] = useState<Set<number>>(new Set())
 
   useEffect(() => { if (!openCodeConfig) loadConfig() }, [])
 
@@ -142,18 +143,20 @@ export default function OpenCodeConfigPage(): JSX.Element {
   }
 
   function renameProvider(oldKey: string, newKey: string): void {
-    if (!openCodeConfig?.provider || !newKey.trim() || newKey === oldKey) return
-    const trimmed = newKey.trim()
-    if (/\s/.test(trimmed)) return
-    if (openCodeConfig.provider[trimmed] && trimmed !== oldKey) return
+    if (!openCodeConfig?.provider) return
+    if (newKey === oldKey) return
+    // Allow empty temporarily while typing, but don't commit empty keys
+    if (!newKey) return
+    // Block duplicate keys (but allow same key with different case during typing)
+    if (newKey !== oldKey && openCodeConfig.provider[newKey]) return
     const entries = Object.entries(openCodeConfig.provider)
     const newProvider: Record<string, any> = {}
     for (const [k, v] of entries) {
-      newProvider[k === oldKey ? trimmed : k] = v
+      newProvider[k === oldKey ? newKey : k] = v
     }
     setOpenCodeConfig({ ...openCodeConfig, provider: newProvider })
     setDirty(true)
-    if (selProv === oldKey) setSelProv(trimmed)
+    if (selProv === oldKey) setSelProv(newKey)
   }
 
   function removeProvider(name: string): void {
@@ -213,8 +216,8 @@ export default function OpenCodeConfigPage(): JSX.Element {
       <div className="mt-4">
         {activeTab === 'providers' && (
           <div className="space-y-3">
-            {Object.entries(openCodeConfig.provider || {}).map(([name, prov]) => (
-              <Card key={name} title={name} description={prov.npm || prov.options?.baseURL || ''} collapsible defaultCollapsed>
+            {Object.entries(openCodeConfig.provider || {}).map(([name, prov], idx) => (
+              <Card key={idx} title={name} description={prov.npm || prov.options?.baseURL || ''} collapsible collapsed={!expandedProviders.has(idx)} onToggle={() => setExpandedProviders(prev => { const next = new Set(prev); if (next.has(idx)) next.delete(idx); else next.add(idx); return next })}>
                 <div className="space-y-3 pt-2">
                   <TextInput label="Provider Key" value={name} onChange={(v) => renameProvider(name, v)} description="Unique identifier used as the JSON key. No spaces allowed." />
                   <TextInput label="Display Name" value={prov.name || name} onChange={(v) => upf(name, 'name', v)} />
