@@ -3,6 +3,7 @@ import {
   detectBun,
   detectNpm,
   detectOpenCode,
+  detectOpenCodeApp,
   getPreferredPackageManager,
   installPlugin,
   installOpenCode,
@@ -36,6 +37,10 @@ export function registerPackageManagerIpc(): void {
 
   ipcMain.handle('pm:detect-opencode', async () => {
     return detectOpenCode()
+  })
+
+  ipcMain.handle('pm:detect-opencode-app', async () => {
+    return detectOpenCodeApp()
   })
 
   ipcMain.handle('pm:install-opencode', async (_event, pm: 'npm' | 'bun') => {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useConfigStore, usePluginStore, useSkillStore, useSettingsStore, useUiStore } from '../stores'
 import { Card, Button, TextInput } from '../components/ui'
 import BackupDialog from '../components/BackupRestore/BackupDialog'
-import { FileJson, Bot, Puzzle, Wand2, RefreshCw, FolderOpen, CheckCircle, XCircle, Package, Archive, Terminal, Download, AlertCircle, Globe, Play, Square, RotateCcw } from 'lucide-react'
+import { FileJson, Bot, Puzzle, Wand2, RefreshCw, FolderOpen, CheckCircle, XCircle, Package, Archive, Terminal, Download, AlertCircle, Globe, Play, Square, RotateCcw, Monitor } from 'lucide-react'
 import type { OpenCodeRuntimeOverview } from '@shared/types'
 
 export default function DashboardPage(): JSX.Element {
@@ -16,6 +16,9 @@ export default function DashboardPage(): JSX.Element {
   const [backupMode, setBackupMode] = useState<'backup' | 'restore' | null>(null)
   const { toggleTerminal } = useUiStore()
   const [ocStatus, setOcStatus] = useState<{ found: boolean; version: string } | null>(null)
+  const [ocAppStatus, setOcAppStatus] = useState<{
+    found: boolean; version: string; installPath: string; appExe: string; cliExe: string
+  } | null>(null)
   const [installing, setInstalling] = useState(false)
   const [installLog, setInstallLog] = useState<string[]>([])
   const [runtimeStatus, setRuntimeStatus] = useState<OpenCodeRuntimeOverview | null>(null)
@@ -26,6 +29,7 @@ export default function DashboardPage(): JSX.Element {
     loadConfigLocations()
     detectPM()
     detectOpenCode()
+    detectOpenCodeApp()
     refreshRuntimeStatus()
   }, [])
 
@@ -132,6 +136,13 @@ export default function DashboardPage(): JSX.Element {
     } catch { setOcStatus({ found: false, version: '' }) }
   }
 
+  async function detectOpenCodeApp(): Promise<void> {
+    try {
+      const result = await (window.api as any).pm.detectOpenCodeApp()
+      setOcAppStatus(result)
+    } catch { setOcAppStatus({ found: false, version: '', installPath: '', appExe: '', cliExe: '' }) }
+  }
+
   async function handleInstallOpenCode(pm: 'npm' | 'bun'): Promise<void> {
     setInstalling(true)
     setInstallLog([`> ${pm === 'bun' ? 'bun add -g opencode-ai' : 'npm i -g opencode-ai'}...`])
@@ -205,6 +216,24 @@ export default function DashboardPage(): JSX.Element {
         </Card>
         <Card>
           <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-accent/10 p-2"><Monitor size={20} className="text-accent" /></div>
+            <div>
+              <p className="text-xs text-themed-muted">OpenCode App</p>
+              <div className="flex items-center gap-1">
+                {ocAppStatus === null ? (
+                  <span className="text-sm font-medium text-themed">Detecting...</span>
+                ) : ocAppStatus.found ? (
+                  <><CheckCircle size={14} className="text-success" /><span className="text-sm font-medium text-themed">{ocAppStatus.version ? `v${ocAppStatus.version}` : 'Installed'}</span></>
+                ) : (
+                  <><XCircle size={14} className="text-themed-muted" /><span className="text-sm font-medium text-themed-muted">Not installed</span></>
+                )}
+              </div>
+              {ocAppStatus?.found && <p className="mt-1 truncate text-xs text-themed-muted" title={ocAppStatus.installPath}>{ocAppStatus.installPath}</p>}
+            </div>
+          </div>
+        </Card>
+        <Card>
+          <div className="flex items-center gap-3">
             <div className="rounded-lg bg-accent/10 p-2"><Package size={20} className="text-accent" /></div>
             <div>
               <p className="text-xs text-themed-muted">Package Manager</p>
@@ -218,15 +247,25 @@ export default function DashboardPage(): JSX.Element {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <AlertCircle size={18} className="text-warning" />
-              <p className="text-sm text-themed-secondary">OpenCode CLI is not installed globally. Install it to get started.</p>
+              <p className="text-sm text-themed-secondary">
+                OpenCode CLI tidak ditemukan di PATH.
+                {ocAppStatus?.found
+                  ? ' Desktop App terdeteksi tapi CLI-nya tidak tersedia di PATH.'
+                  : ' Install via npm/bun atau download OpenCode Desktop App.'}
+              </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button onClick={() => handleInstallOpenCode('npm')} loading={installing} disabled={installing}>
-                <Download size={16} /> Install with npm
+                <Download size={16} /> Install CLI (npm)
               </Button>
               <Button variant="secondary" onClick={() => handleInstallOpenCode('bun')} loading={installing} disabled={installing || !pmInfo || pmInfo.preferred !== 'bun'}>
-                <Download size={16} /> Install with bun
+                <Download size={16} /> Install CLI (bun)
               </Button>
+              {!ocAppStatus?.found && (
+                <Button variant="secondary" onClick={() => (window as any).electron?.shell?.openExternal?.('https://opencode.ai/download/stable/windows-x64-nsis') || window.open('https://opencode.ai/download/stable/windows-x64-nsis')}>
+                  <Monitor size={16} /> Download Desktop App
+                </Button>
+              )}
             </div>
             {installLog.length > 0 && (
               <div className="max-h-32 overflow-auto rounded-md bg-primary p-2 font-mono text-xs text-themed-muted">
