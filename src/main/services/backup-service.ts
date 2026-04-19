@@ -1,6 +1,17 @@
 import { createWriteStream, existsSync, mkdirSync } from 'fs'
 import { readFile, readdir, stat, copyFile } from 'fs/promises'
 import { join, basename, dirname } from 'path'
+
+function getBackupDir(baseDir: string): string {
+  const now = new Date()
+  const dateFolder = now.toISOString().slice(0, 10)
+  const timeFolder = now.toTimeString().slice(0, 8).replace(/:/g, '-')
+  const bakDir = join(baseDir, 'bak', dateFolder, timeFolder)
+  if (!existsSync(bakDir)) {
+    mkdirSync(bakDir, { recursive: true })
+  }
+  return bakDir
+}
 import archiver from 'archiver'
 import extractZip from 'extract-zip'
 import type { BackupInfo } from '@shared/types/app-types'
@@ -56,10 +67,10 @@ export async function restoreBackup(
     const src = join(tempDir, entry)
     const dest = join(targetDir, entry)
 
-    // Backup existing before overwrite
+    // Backup existing before overwrite — save to bak/ subfolder
     if (existsSync(dest)) {
-      const ts = new Date().toISOString().replace(/[:.]/g, '-')
-      await copyFile(dest, `${dest}.pre-restore.${ts}`)
+      const bakDir = getBackupDir(targetDir)
+      await copyFile(dest, join(bakDir, entry))
     }
 
     await copyFile(src, dest)

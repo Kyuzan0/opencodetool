@@ -16,14 +16,15 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
+    "@tarquinen/opencode-dcp": "^3.1.9",
+    "archiver": "^7.0.1",
+    "extract-zip": "^2.0.1",
+    "jsonc-parser": "^3.3.1",
+    "lucide-react": "^0.460.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
-    "zustand": "^5.0.0",
-    "jsonc-parser": "^3.3.1",
-    "lucide-react": "^0.460.0",
-    "archiver": "^7.0.1",
-    "extract-zip": "^2.0.1"
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
     "electron": "^33.2.0",

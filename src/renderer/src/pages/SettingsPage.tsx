@@ -1,21 +1,28 @@
 import { useState, useEffect } from 'react'
-import { useSettingsStore } from '../stores'
+import { useSettingsStore, useConfigStore, usePluginStore, useSkillStore } from '../stores'
 import { Card, TextInput, SelectInput, ToggleSwitch, Button, Modal } from '../components/ui'
-import { Moon, Sun, FolderOpen, ExternalLink, Trash2, AlertTriangle } from 'lucide-react'
+import { Moon, Sun, FolderOpen, ExternalLink, Trash2, AlertTriangle, CheckCircle, Database, FolderX } from 'lucide-react'
 import type { ShellInfo } from '@shared/types'
 
 interface UninstallTargets {
+  cli: string[]
   core: string[]
   plugins: string[]
   mcp: string[]
   skills: string[]
+  sessions: string[]
+  projectData: string[]
 }
 
 interface UninstallOptions {
+  cli: boolean
   core: boolean
   plugins: boolean
   mcp: boolean
   skills: boolean
+  sessions: boolean
+  projectData: boolean
+  projectPaths?: string[]
 }
 
 export default function SettingsPage(): JSX.Element {
@@ -26,9 +33,12 @@ export default function SettingsPage(): JSX.Element {
   const [shells, setShells] = useState<ShellInfo[]>([])
   const [showUninstallModal, setShowUninstallModal] = useState(false)
   const [uninstallTargets, setUninstallTargets] = useState<UninstallTargets | null>(null)
-  const [uninstallOpts, setUninstallOpts] = useState<UninstallOptions>({ core: true, plugins: true, mcp: true, skills: true })
+  const [uninstallOpts, setUninstallOpts] = useState<UninstallOptions>({
+    cli: true, core: true, plugins: true, mcp: true, skills: true, sessions: true, projectData: false
+  })
   const [uninstalling, setUninstalling] = useState(false)
   const [uninstallResult, setUninstallResult] = useState<{ removed: string[]; errors: string[] } | null>(null)
+  const [uninstallDone, setUninstallDone] = useState(false)
 
   useEffect(() => {
     window.api.shell.detect().then(setShells).catch(() => {})
@@ -38,20 +48,60 @@ export default function SettingsPage(): JSX.Element {
     try {
       const targets = await window.api.uninstall.scan()
       setUninstallTargets(targets)
-      setUninstallOpts({ core: true, plugins: true, mcp: true, skills: true })
+      setUninstallOpts({
+        cli: true, core: true, plugins: true, mcp: true, skills: true,
+        sessions: true, projectData: false
+      })
       setUninstallResult(null)
+      setUninstallDone(false)
       setShowUninstallModal(true)
     } catch { /* ignore */ }
+  }
+
+  function resetAllStores(): void {
+    const configStore = useConfigStore.getState()
+    configStore.setOpenCodeConfig(null)
+    configStore.setAgentConfig(null)
+    configStore.setConfigPath(null)
+    configStore.setAgentConfigPath(null)
+    configStore.setError(null)
+    configStore.setDirty(false)
+    configStore.setAgentDirty(false)
+
+    usePluginStore.getState().setPlugins([])
+
+    useSkillStore.getState().setSkills([])
+    useSkillStore.getState().setSelectedSkill(null)
   }
 
   async function handleUninstall(): Promise<void> {
     setUninstalling(true)
     try {
-      const result = await window.api.uninstall.perform(uninstallOpts)
+      // Build project paths from scanned targets if projectData is enabled
+      const opts: UninstallOptions = { ...uninstallOpts }
+      if (opts.projectData && uninstallTargets?.projectData.length) {
+        // Extract parent project paths from the .opencode/.kilo/.sisyphus paths
+        opts.projectPaths = [...new Set(
+          uninstallTargets.projectData.map(p => {
+            // e.g. D:\laragon\www\app\projek3\.sisyphus -> D:\laragon\www\app\projek3
+            const parts = p.replace(/\\/g, '/').split('/')
+            parts.pop() // remove .opencode/.kilo/.sisyphus
+            return parts.join('\\')
+          })
+        )]
+      }
+
+      const result = await window.api.uninstall.perform(opts)
       setUninstallResult(result)
-      // Re-scan to update counts
+
       const targets = await window.api.uninstall.scan()
       setUninstallTargets(targets)
+
+      resetAllStores()
+
+      if (result.removed.length > 0) {
+        setUninstallDone(true)
+      }
     } catch (e: any) {
       setUninstallResult({ removed: [], errors: [e.message || 'Uninstall failed'] })
     } finally {
@@ -60,6 +110,9 @@ export default function SettingsPage(): JSX.Element {
   }
 
   const shellOpts = shells.filter((s) => s.available).map((s) => ({ value: s.name, label: `${s.name} (${s.path})` }))
+
+  const hasAnyOption = uninstallOpts.cli || uninstallOpts.core || uninstallOpts.plugins ||
+    uninstallOpts.mcp || uninstallOpts.skills || uninstallOpts.sessions || uninstallOpts.projectData
 
   return (
     <div className="space-y-6">
@@ -129,22 +182,32 @@ export default function SettingsPage(): JSX.Element {
 
       <Card title="Danger Zone">
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-sm font-medium text-danger">Uninstall OpenCode</span>
-              <p className="text-xs text-themed-muted">Remove OpenCode configurations, plugins, MCP servers, and skills</p>
+          {uninstallDone ? (
+            <div className="flex items-center gap-2">
+              <CheckCircle size={18} className="text-success" />
+              <div>
+                <span className="text-sm font-medium text-success">OpenCode has been uninstalled</span>
+                <p className="text-xs text-themed-muted">All selected components have been removed. Reinstall will start fresh.</p>
+              </div>
             </div>
-            <Button variant="danger" onClick={openUninstallModal}>
-              <Trash2 size={16} /> Uninstall
-            </Button>
-          </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-sm font-medium text-danger">Complete Uninstall OpenCode</span>
+                <p className="text-xs text-themed-muted">Remove ALL OpenCode data: CLI, configs, plugins, sessions, databases, and project state</p>
+              </div>
+              <Button variant="danger" onClick={openUninstallModal}>
+                <Trash2 size={16} /> Uninstall
+              </Button>
+            </div>
+          )}
         </div>
       </Card>
 
       <Modal
         open={showUninstallModal}
         onClose={() => !uninstalling && setShowUninstallModal(false)}
-        title="Uninstall OpenCode"
+        title="Complete Uninstall OpenCode"
         className="max-w-2xl"
         actions={
           uninstallResult ? (
@@ -152,11 +215,11 @@ export default function SettingsPage(): JSX.Element {
           ) : (
             <>
               <Button variant="secondary" onClick={() => setShowUninstallModal(false)} disabled={uninstalling}>Cancel</Button>
-              <Button
+               <Button
                 variant="danger"
                 onClick={handleUninstall}
                 loading={uninstalling}
-                disabled={!uninstallOpts.core && !uninstallOpts.plugins && !uninstallOpts.mcp && !uninstallOpts.skills}
+                disabled={!hasAnyOption}
               >
                 <Trash2 size={16} /> Uninstall Selected
               </Button>
@@ -188,21 +251,31 @@ export default function SettingsPage(): JSX.Element {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 rounded-md border border-warning/30 bg-warning/10 p-3">
-              <AlertTriangle size={18} className="text-warning shrink-0" />
-              <p className="text-xs text-warning">This action is irreversible. Selected items will be permanently deleted.</p>
+            <div className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger/10 p-3">
+              <AlertTriangle size={18} className="text-danger shrink-0" />
+              <p className="text-xs text-danger">
+                This will completely remove ALL OpenCode/Kilo data so reinstallation starts fresh.
+                This action is irreversible.
+              </p>
             </div>
 
             <div className="space-y-3">
               <ToggleSwitch
-                label="Core Configurations"
-                description={`opencode.json, oh-my-openagent.json, kilo.json${uninstallTargets ? ` (${uninstallTargets.core.length} found)` : ''}`}
+                label="OpenCode CLI"
+                description={`opencode-ai global package (npm/bun)${uninstallTargets ? ` (${uninstallTargets.cli.length > 0 ? 'installed' : 'not found'})` : ''}`}
+                checked={uninstallOpts.cli}
+                onChange={(v) => setUninstallOpts((o) => ({ ...o, cli: v }))}
+                disabled={!uninstallTargets?.cli.length}
+              />
+              <ToggleSwitch
+                label="Config Directories (ENTIRE)"
+                description={`~/.config/opencode/, ~/.config/kilo/, %APPDATA%/opencode/ — removes everything${uninstallTargets ? ` (${uninstallTargets.core.length} dirs)` : ''}`}
                 checked={uninstallOpts.core}
                 onChange={(v) => setUninstallOpts((o) => ({ ...o, core: v }))}
               />
               <ToggleSwitch
-                label="Plugins"
-                description={`node_modules, package.json in config directory${uninstallTargets ? ` (${uninstallTargets.plugins.length} found)` : ''}`}
+                label="Plugins & Dependencies"
+                description={`node_modules, package.json, lock files${uninstallTargets ? ` (${uninstallTargets.plugins.length} found)` : ''}`}
                 checked={uninstallOpts.plugins}
                 onChange={(v) => setUninstallOpts((o) => ({ ...o, plugins: v }))}
               />
@@ -218,22 +291,74 @@ export default function SettingsPage(): JSX.Element {
                 checked={uninstallOpts.skills}
                 onChange={(v) => setUninstallOpts((o) => ({ ...o, skills: v }))}
               />
+
+              <div className="border-t border-border-default pt-3">
+                <p className="text-xs font-medium text-warning mb-2 flex items-center gap-1">
+                  <Database size={14} /> Session & State Data
+                </p>
+              </div>
+
+              <ToggleSwitch
+                label="Sessions & Database"
+                description={`Session history, SQLite databases, logs, snapshots, auth tokens, locks${uninstallTargets ? ` (${uninstallTargets.sessions.length} locations)` : ''}`}
+                checked={uninstallOpts.sessions}
+                onChange={(v) => setUninstallOpts((o) => ({ ...o, sessions: v }))}
+              />
+              <ToggleSwitch
+                label="Project State (.opencode/.kilo/.sisyphus)"
+                description={`Remove state directories from all detected projects${uninstallTargets ? ` (${uninstallTargets.projectData.length} found)` : ''}`}
+                checked={uninstallOpts.projectData}
+                onChange={(v) => setUninstallOpts((o) => ({ ...o, projectData: v }))}
+              />
             </div>
 
             {uninstallTargets && (
               <details className="text-xs text-themed-muted">
-                <summary className="cursor-pointer hover:text-themed-secondary">Show files to be removed</summary>
-                <div className="mt-2 max-h-40 overflow-auto rounded-md bg-primary p-2 font-mono">
-                  {uninstallOpts.core && uninstallTargets.core.map((p, i) => <div key={`c${i}`}>{p}</div>)}
-                  {uninstallOpts.plugins && uninstallTargets.plugins.map((p, i) => <div key={`p${i}`}>{p}</div>)}
-                  {uninstallOpts.mcp && uninstallTargets.mcp.map((p, i) => <div key={`m${i}`}>{p}</div>)}
-                  {uninstallOpts.skills && uninstallTargets.skills.map((p, i) => <div key={`s${i}`}>{p}</div>)}
-                  {[
-                    ...(uninstallOpts.core ? uninstallTargets.core : []),
-                    ...(uninstallOpts.plugins ? uninstallTargets.plugins : []),
-                    ...(uninstallOpts.mcp ? uninstallTargets.mcp : []),
-                    ...(uninstallOpts.skills ? uninstallTargets.skills : [])
-                  ].length === 0 && <div>No files found for selected categories.</div>}
+                <summary className="cursor-pointer hover:text-themed-secondary">Show all files/directories to be removed</summary>
+                <div className="mt-2 max-h-48 overflow-auto rounded-md bg-primary p-2 font-mono space-y-2">
+                  {uninstallOpts.cli && uninstallTargets.cli.length > 0 && (
+                    <div>
+                      <div className="text-accent font-semibold">CLI:</div>
+                      {uninstallTargets.cli.map((p, i) => <div key={`cli${i}`} className="pl-2">{p}</div>)}
+                    </div>
+                  )}
+                  {uninstallOpts.core && uninstallTargets.core.length > 0 && (
+                    <div>
+                      <div className="text-accent font-semibold">Config Directories:</div>
+                      {uninstallTargets.core.map((p, i) => <div key={`c${i}`} className="pl-2">{p}</div>)}
+                    </div>
+                  )}
+                  {uninstallOpts.plugins && uninstallTargets.plugins.length > 0 && (
+                    <div>
+                      <div className="text-accent font-semibold">Plugins:</div>
+                      {uninstallTargets.plugins.map((p, i) => <div key={`p${i}`} className="pl-2">{p}</div>)}
+                    </div>
+                  )}
+                  {uninstallOpts.mcp && uninstallTargets.mcp.length > 0 && (
+                    <div>
+                      <div className="text-accent font-semibold">MCP:</div>
+                      {uninstallTargets.mcp.map((p, i) => <div key={`m${i}`} className="pl-2">{p}</div>)}
+                    </div>
+                  )}
+                  {uninstallOpts.skills && uninstallTargets.skills.length > 0 && (
+                    <div>
+                      <div className="text-accent font-semibold">Skills:</div>
+                      {uninstallTargets.skills.map((p, i) => <div key={`s${i}`} className="pl-2">{p}</div>)}
+                    </div>
+                  )}
+                  {uninstallOpts.sessions && uninstallTargets.sessions.length > 0 && (
+                    <div>
+                      <div className="text-warning font-semibold">Sessions & Database:</div>
+                      {uninstallTargets.sessions.map((p, i) => <div key={`ss${i}`} className="pl-2">{p}</div>)}
+                    </div>
+                  )}
+                  {uninstallOpts.projectData && uninstallTargets.projectData.length > 0 && (
+                    <div>
+                      <div className="text-warning font-semibold">Project State:</div>
+                      {uninstallTargets.projectData.map((p, i) => <div key={`pd${i}`} className="pl-2">{p}</div>)}
+                    </div>
+                  )}
+                  {!hasAnyOption && <div>No categories selected.</div>}
                 </div>
               </details>
             )}

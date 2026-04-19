@@ -18,7 +18,9 @@ const api = {
     uninstall: (pluginName: string, configDir: string) => ipcRenderer.invoke('pm:uninstall', pluginName, configDir),
     list: (configDir: string) => ipcRenderer.invoke('pm:list', configDir),
     detectOpenCode: () => ipcRenderer.invoke('pm:detect-opencode'),
-    installOpenCode: (pm: 'npm' | 'bun') => ipcRenderer.invoke('pm:install-opencode', pm)
+    installOpenCode: (pm: 'npm' | 'bun') => ipcRenderer.invoke('pm:install-opencode', pm),
+    openagentDoctor: () => ipcRenderer.invoke('pm:openagent-doctor'),
+    openagentVersion: () => ipcRenderer.invoke('pm:openagent-version')
   },
   shell: {
     detect: () => ipcRenderer.invoke('shell:detect'),
@@ -60,7 +62,7 @@ const api = {
   },
   uninstall: {
     scan: () => ipcRenderer.invoke('uninstall:scan'),
-    perform: (options: { core: boolean; plugins: boolean; mcp: boolean; skills: boolean }) =>
+    perform: (options: { cli: boolean; core: boolean; plugins: boolean; mcp: boolean; skills: boolean; sessions: boolean; projectData: boolean; projectPaths?: string[] }) =>
       ipcRenderer.invoke('uninstall:perform', options)
   },
   dialog: {

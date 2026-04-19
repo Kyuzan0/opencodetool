@@ -1,6 +1,6 @@
 import { readFile, writeFile, copyFile, access, stat } from 'fs/promises'
 import { existsSync, mkdirSync } from 'fs'
-import { join, dirname, extname } from 'path'
+import { join, dirname, extname, basename } from 'path'
 import { homedir } from 'os'
 import * as jsonc from 'jsonc-parser'
 import type { ConfigLocation } from '@shared/types/app-types'
@@ -47,8 +47,17 @@ export async function writeConfig(
 }
 
 export async function backupConfig(filePath: string): Promise<string> {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-  const backupPath = `${filePath}.backup.${timestamp}`
+  const now = new Date()
+  const dateFolder = now.toISOString().slice(0, 10) // YYYY-MM-DD
+  const timeFolder = now.toTimeString().slice(0, 8).replace(/:/g, '-') // HH-mm-ss
+  const configDir = dirname(filePath)
+  const bakDir = join(configDir, 'bak', dateFolder, timeFolder)
+
+  if (!existsSync(bakDir)) {
+    mkdirSync(bakDir, { recursive: true })
+  }
+
+  const backupPath = join(bakDir, basename(filePath))
   await copyFile(filePath, backupPath)
   return backupPath
 }

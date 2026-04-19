@@ -41,4 +41,20 @@ export function registerPackageManagerIpc(): void {
   ipcMain.handle('pm:install-opencode', async (_event, pm: 'npm' | 'bun') => {
     return installOpenCode(pm)
   })
+
+  ipcMain.handle('pm:openagent-doctor', async () => {
+    const bun = await detectBun()
+    if (bun) {
+      return runCommand(bun.path, ['x', 'oh-my-openagent', 'doctor', '--json'], undefined, 60000)
+    }
+    return runCommand('npx', ['oh-my-openagent', 'doctor', '--json'], undefined, 60000)
+  })
+
+  ipcMain.handle('pm:openagent-version', async () => {
+    const bun = await detectBun()
+    if (bun) {
+      return runCommand(bun.path, ['x', 'oh-my-openagent', '--version'], undefined, 15000)
+    }
+    return runCommand('npx', ['oh-my-openagent', '--version'], undefined, 15000)
+  })
 }

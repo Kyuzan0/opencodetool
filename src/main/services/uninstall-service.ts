@@ -2,13 +2,17 @@ import { rm, readdir, stat, readFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import { homedir } from 'os'
-import { uninstallPlugin, listInstalledPackages } from './package-manager-service'
+import { detectBun, detectOpenCode, runCommand } from './package-manager-service'
 
 export interface UninstallOptions {
+  cli: boolean
   core: boolean
   plugins: boolean
   mcp: boolean
   skills: boolean
+  sessions: boolean
+  projectData: boolean
+  projectPaths?: string[]
 }
 
 export interface UninstallResult {
@@ -16,18 +20,52 @@ export interface UninstallResult {
   errors: string[]
 }
 
-function getGlobalConfigDirs(): string[] {
-  const home = homedir()
-  const dirs = [
-    join(home, '.config', 'opencode'),
-    join(home, '.config', 'kilo')
-  ]
+// ── Path helpers ────────────────────────────────────────────────────
+
+function getHome(): string {
+  return homedir()
+}
+
+function getConfigDirs(): { opencode: string; kilo: string } {
+  const home = getHome()
+  return {
+    opencode: join(home, '.config', 'opencode'),
+    kilo: join(home, '.config', 'kilo')
+  }
+}
+
+function getDataDirs(): { opencode: string; kilo: string } {
+  const home = getHome()
+  return {
+    opencode: join(home, '.local', 'share', 'opencode'),
+    kilo: join(home, '.local', 'share', 'kilo')
+  }
+}
+
+function getStateDirs(): { opencode: string; kilo: string } {
+  const home = getHome()
+  return {
+    opencode: join(home, '.local', 'state', 'opencode'),
+    kilo: join(home, '.local', 'state', 'kilo')
+  }
+}
+
+function getAppDataDirs(): string[] {
+  const dirs: string[] = []
   const appData = process.env.APPDATA
   if (appData) {
     dirs.push(join(appData, 'opencode'))
+    dirs.push(join(appData, 'kilo'))
+  }
+  const localAppData = process.env.LOCALAPPDATA
+  if (localAppData) {
+    dirs.push(join(localAppData, 'opencode'))
+    dirs.push(join(localAppData, 'kilo'))
   }
   return dirs
 }
+
+// ── Remove helper ───────────────────────────────────────────────────
 
 async function removePath(target: string, result: UninstallResult): Promise<void> {
   try {
@@ -41,46 +79,61 @@ async function removePath(target: string, result: UninstallResult): Promise<void
   }
 }
 
-async function removeCore(result: UninstallResult): Promise<void> {
-  const home = homedir()
-  const appData = process.env.APPDATA
+// ── Removal functions ───────────────────────────────────────────────
 
-  // Core config files
-  const coreFiles = [
-    join(home, '.config', 'opencode', 'opencode.json'),
-    join(home, '.config', 'opencode', 'opencode.jsonc'),
-    join(home, '.config', 'opencode', 'oh-my-openagent.json'),
-    join(home, '.config', 'opencode', 'oh-my-openagent.jsonc'),
-    join(home, '.config', 'opencode', 'oh-my-opencode.json'),
-    join(home, '.config', 'opencode', 'oh-my-opencode.jsonc'),
-    join(home, '.config', 'kilo', 'kilo.json'),
-    join(home, '.config', 'kilo', 'kilo.jsonc'),
-  ]
-
-  if (appData) {
-    coreFiles.push(
-      join(appData, 'opencode', 'opencode.json'),
-      join(appData, 'opencode', 'oh-my-openagent.json'),
-      join(appData, 'opencode', 'oh-my-openagent.jsonc')
-    )
+async function removeCli(result: UninstallResult): Promise<void> {
+  const bun = await detectBun()
+  if (bun) {
+    try {
+      const bunResult = await runCommand(bun.path, ['remove', '-g', 'opencode-ai'], undefined, 30000)
+      if (bunResult.exitCode === 0) {
+        result.removed.push('opencode-ai (bun global)')
+        return
+      }
+    } catch { /* try npm next */ }
   }
 
-  for (const f of coreFiles) {
-    await removePath(f, result)
+  try {
+    const npmResult = await runCommand('npm', ['uninstall', '-g', 'opencode-ai'], undefined, 30000)
+    if (npmResult.exitCode === 0) {
+      result.removed.push('opencode-ai (npm global)')
+    } else {
+      result.errors.push(`Failed to uninstall CLI: ${npmResult.stderr || 'unknown error'}`)
+    }
+  } catch (e: any) {
+    result.errors.push(`Failed to uninstall CLI: ${e.message}`)
+  }
+}
+
+async function removeCore(result: UninstallResult): Promise<void> {
+  const { opencode, kilo } = getConfigDirs()
+
+  // Remove ENTIRE config directories (not just individual files)
+  await removePath(opencode, result)
+  await removePath(kilo, result)
+
+  // Also remove AppData directories
+  for (const dir of getAppDataDirs()) {
+    await removePath(dir, result)
   }
 }
 
 async function removePlugins(result: UninstallResult): Promise<void> {
-  const home = homedir()
-  const configDir = join(home, '.config', 'opencode')
+  // Plugins live inside the config dirs. If core removal already deleted them,
+  // this handles the case where core=false but plugins=true.
+  const { opencode, kilo } = getConfigDirs()
 
-  // Remove node_modules and package.json in config dir (plugin install location)
   const pluginPaths = [
-    join(configDir, 'node_modules'),
-    join(configDir, 'package.json'),
-    join(configDir, 'package-lock.json'),
-    join(configDir, 'bun.lockb'),
-    join(configDir, 'bun.lock'),
+    join(opencode, 'node_modules'),
+    join(opencode, 'package.json'),
+    join(opencode, 'package-lock.json'),
+    join(opencode, 'bun.lockb'),
+    join(opencode, 'bun.lock'),
+    join(kilo, 'node_modules'),
+    join(kilo, 'package.json'),
+    join(kilo, 'package-lock.json'),
+    join(kilo, 'bun.lockb'),
+    join(kilo, 'bun.lock'),
   ]
 
   for (const p of pluginPaths) {
@@ -89,16 +142,15 @@ async function removePlugins(result: UninstallResult): Promise<void> {
 }
 
 async function removeMcp(result: UninstallResult): Promise<void> {
-  const home = homedir()
+  const { opencode, kilo } = getConfigDirs()
 
-  // MCP config locations
   const mcpPaths = [
-    join(home, '.config', 'opencode', 'mcp.json'),
-    join(home, '.config', 'opencode', 'mcp.jsonc'),
-    join(home, '.config', 'kilo', 'mcp.json'),
-    join(home, '.config', 'kilo', 'mcp.jsonc'),
-    join(home, '.config', 'opencode', 'mcp'),
-    join(home, '.config', 'kilo', 'mcp'),
+    join(opencode, 'mcp.json'),
+    join(opencode, 'mcp.jsonc'),
+    join(kilo, 'mcp.json'),
+    join(kilo, 'mcp.jsonc'),
+    join(opencode, 'mcp'),
+    join(kilo, 'mcp'),
   ]
 
   const appData = process.env.APPDATA
@@ -115,62 +167,105 @@ async function removeMcp(result: UninstallResult): Promise<void> {
 }
 
 async function removeSkills(result: UninstallResult): Promise<void> {
-  const home = homedir()
+  const { opencode, kilo } = getConfigDirs()
 
-  const skillDirs = [
-    join(home, '.config', 'opencode', 'skills'),
-    join(home, '.config', 'kilo', 'skill'),
-    join(home, '.config', 'opencode', 'skill'),
+  const dirs = [
+    join(opencode, 'skills'),
+    join(opencode, 'skill'),
+    join(opencode, 'command'),
+    join(opencode, 'agent'),
+    join(kilo, 'skill'),
+    join(kilo, 'command'),
+    join(kilo, 'agent'),
   ]
 
-  // Also remove command/agent dirs (custom agents and commands)
-  const extraDirs = [
-    join(home, '.config', 'kilo', 'command'),
-    join(home, '.config', 'kilo', 'agent'),
-    join(home, '.config', 'opencode', 'command'),
-    join(home, '.config', 'opencode', 'agent'),
-  ]
-
-  for (const d of [...skillDirs, ...extraDirs]) {
+  for (const d of dirs) {
     await removePath(d, result)
   }
 }
 
+async function removeSessions(result: UninstallResult): Promise<void> {
+  const data = getDataDirs()
+  const state = getStateDirs()
+
+  // Remove entire data directories (contains DB, logs, snapshots, auth, tool-output)
+  await removePath(data.opencode, result)
+  await removePath(data.kilo, result)
+
+  // Remove state directories (contains locks)
+  await removePath(state.opencode, result)
+  await removePath(state.kilo, result)
+
+  // Remove AppData directories (contains WebView cache etc.)
+  for (const dir of getAppDataDirs()) {
+    await removePath(dir, result)
+  }
+}
+
+async function removeProjectData(projectPaths: string[], result: UninstallResult): Promise<void> {
+  for (const projectPath of projectPaths) {
+    if (!existsSync(projectPath)) continue
+
+    // Remove all OpenCode/Kilo/Sisyphus state directories in the project
+    const projectStateDirs = [
+      join(projectPath, '.opencode'),
+      join(projectPath, '.kilo'),
+      join(projectPath, '.sisyphus'),
+    ]
+
+    for (const d of projectStateDirs) {
+      await removePath(d, result)
+    }
+  }
+}
+
+// ── Scan ────────────────────────────────────────────────────────────
+
 export async function scanUninstallTargets(): Promise<{
+  cli: string[]
   core: string[]
   plugins: string[]
   mcp: string[]
   skills: string[]
+  sessions: string[]
+  projectData: string[]
 }> {
-  const home = homedir()
+  const { opencode, kilo } = getConfigDirs()
+  const data = getDataDirs()
+  const state = getStateDirs()
   const appData = process.env.APPDATA
-  const found = { core: [] as string[], plugins: [] as string[], mcp: [] as string[], skills: [] as string[] }
 
-  // Core
-  const coreFiles = [
-    join(home, '.config', 'opencode', 'opencode.json'),
-    join(home, '.config', 'opencode', 'opencode.jsonc'),
-    join(home, '.config', 'opencode', 'oh-my-openagent.json'),
-    join(home, '.config', 'opencode', 'oh-my-openagent.jsonc'),
-    join(home, '.config', 'opencode', 'oh-my-opencode.json'),
-    join(home, '.config', 'opencode', 'oh-my-opencode.jsonc'),
-    join(home, '.config', 'kilo', 'kilo.json'),
-    join(home, '.config', 'kilo', 'kilo.jsonc'),
-  ]
-  if (appData) {
-    coreFiles.push(
-      join(appData, 'opencode', 'opencode.json'),
-      join(appData, 'opencode', 'oh-my-openagent.json')
-    )
+  const found = {
+    cli: [] as string[],
+    core: [] as string[],
+    plugins: [] as string[],
+    mcp: [] as string[],
+    skills: [] as string[],
+    sessions: [] as string[],
+    projectData: [] as string[],
   }
-  for (const f of coreFiles) {
-    if (existsSync(f)) found.core.push(f)
+
+  // CLI
+  try {
+    const oc = await detectOpenCode()
+    if (oc.found) {
+      found.cli.push(`opencode-ai v${oc.version} (${oc.path})`)
+    }
+  } catch { /* ignore */ }
+
+  // Core — show entire directories
+  if (existsSync(opencode)) found.core.push(opencode)
+  if (existsSync(kilo)) found.core.push(kilo)
+  for (const dir of getAppDataDirs()) {
+    if (existsSync(dir)) found.core.push(dir)
   }
 
   // Plugins
   const pluginPaths = [
-    join(home, '.config', 'opencode', 'node_modules'),
-    join(home, '.config', 'opencode', 'package.json'),
+    join(opencode, 'node_modules'),
+    join(opencode, 'package.json'),
+    join(kilo, 'node_modules'),
+    join(kilo, 'package.json'),
   ]
   for (const p of pluginPaths) {
     if (existsSync(p)) found.plugins.push(p)
@@ -178,12 +273,12 @@ export async function scanUninstallTargets(): Promise<{
 
   // MCP
   const mcpPaths = [
-    join(home, '.config', 'opencode', 'mcp.json'),
-    join(home, '.config', 'opencode', 'mcp.jsonc'),
-    join(home, '.config', 'kilo', 'mcp.json'),
-    join(home, '.config', 'kilo', 'mcp.jsonc'),
-    join(home, '.config', 'opencode', 'mcp'),
-    join(home, '.config', 'kilo', 'mcp'),
+    join(opencode, 'mcp.json'),
+    join(opencode, 'mcp.jsonc'),
+    join(kilo, 'mcp.json'),
+    join(kilo, 'mcp.jsonc'),
+    join(opencode, 'mcp'),
+    join(kilo, 'mcp'),
   ]
   if (appData) {
     mcpPaths.push(join(appData, 'opencode', 'mcp.json'))
@@ -194,28 +289,100 @@ export async function scanUninstallTargets(): Promise<{
 
   // Skills
   const skillDirs = [
-    join(home, '.config', 'opencode', 'skills'),
-    join(home, '.config', 'kilo', 'skill'),
-    join(home, '.config', 'opencode', 'skill'),
-    join(home, '.config', 'kilo', 'command'),
-    join(home, '.config', 'kilo', 'agent'),
-    join(home, '.config', 'opencode', 'command'),
-    join(home, '.config', 'opencode', 'agent'),
+    join(opencode, 'skills'),
+    join(opencode, 'skill'),
+    join(opencode, 'command'),
+    join(opencode, 'agent'),
+    join(kilo, 'skill'),
+    join(kilo, 'command'),
+    join(kilo, 'agent'),
   ]
   for (const d of skillDirs) {
     if (existsSync(d)) found.skills.push(d)
   }
 
+  // Sessions & data
+  if (existsSync(data.opencode)) {
+    try {
+      const dbPath = join(data.opencode, 'opencode.db')
+      if (existsSync(dbPath)) {
+        const s = await stat(dbPath)
+        const sizeMB = (s.size / (1024 * 1024)).toFixed(1)
+        found.sessions.push(`${data.opencode} (DB: ${sizeMB} MB)`)
+      } else {
+        found.sessions.push(data.opencode)
+      }
+    } catch {
+      found.sessions.push(data.opencode)
+    }
+  }
+  if (existsSync(data.kilo)) {
+    try {
+      const dbPath = join(data.kilo, 'kilo.db')
+      if (existsSync(dbPath)) {
+        const s = await stat(dbPath)
+        const sizeMB = (s.size / (1024 * 1024)).toFixed(1)
+        found.sessions.push(`${data.kilo} (DB: ${sizeMB} MB)`)
+      } else {
+        found.sessions.push(data.kilo)
+      }
+    } catch {
+      found.sessions.push(data.kilo)
+    }
+  }
+  if (existsSync(state.opencode)) found.sessions.push(state.opencode)
+  if (existsSync(state.kilo)) found.sessions.push(state.kilo)
+  for (const dir of getAppDataDirs()) {
+    if (existsSync(dir)) found.sessions.push(dir)
+  }
+
+  // Project data — scan common project directories for .opencode/.kilo/.sisyphus
+  const home = getHome()
+  const searchRoots = [
+    join(home, 'projects'),
+    join(home, 'dev'),
+    join(home, 'code'),
+    join(home, 'Documents'),
+    join(home, 'Desktop'),
+    'D:\\laragon\\www\\app',
+    'D:\\laragon\\www',
+  ]
+
+  for (const root of searchRoots) {
+    if (!existsSync(root)) continue
+    try {
+      const entries = await readdir(root, { withFileTypes: true })
+      for (const entry of entries) {
+        if (!entry.isDirectory()) continue
+        const projectPath = join(root, entry.name)
+        const stateDirs = ['.opencode', '.kilo', '.sisyphus']
+        for (const sd of stateDirs) {
+          const fullPath = join(projectPath, sd)
+          if (existsSync(fullPath)) {
+            found.projectData.push(fullPath)
+          }
+        }
+      }
+    } catch { /* ignore permission errors */ }
+  }
+
   return found
 }
+
+// ── Perform uninstall ───────────────────────────────────────────────
 
 export async function performUninstall(options: UninstallOptions): Promise<UninstallResult> {
   const result: UninstallResult = { removed: [], errors: [] }
 
+  if (options.cli) await removeCli(result)
+  if (options.sessions) await removeSessions(result)
   if (options.core) await removeCore(result)
   if (options.plugins) await removePlugins(result)
   if (options.mcp) await removeMcp(result)
   if (options.skills) await removeSkills(result)
+  if (options.projectData && options.projectPaths?.length) {
+    await removeProjectData(options.projectPaths, result)
+  }
 
   return result
 }

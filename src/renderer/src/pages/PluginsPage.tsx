@@ -103,8 +103,15 @@ export default function PluginsPage(): JSX.Element {
 
   function updatePluginList(newList: string[]): void {
     if (!openCodeConfig) return
-    setOpenCodeConfig({ ...openCodeConfig, plugin: newList })
-    setDirty(true)
+    const updated = { ...openCodeConfig, plugin: newList }
+    setOpenCodeConfig(updated)
+    setDirty(false)
+    // Auto-save to disk so changes persist across reloads
+    if (configPath?.path) {
+      window.api.config.write(configPath.path, updated as any, {
+        format: configPath.format || 'json'
+      }).catch(() => { setDirty(true) })
+    }
   }
 
   function extractPluginName(input: string): string {
@@ -172,13 +179,27 @@ export default function PluginsPage(): JSX.Element {
     setLogLines((prev) => [...prev, `> Uninstalling ${name}...`])
     try {
       const configDir = configPath?.path ? configPath.path.replace(/[/\\][^/\\]+$/, '') : ''
-      await window.api.pm.uninstall(name, configDir)
+      const result = await window.api.pm.uninstall(name, configDir)
+
+      // Remove from config regardless of npm/bun result
+      // (package may not exist in node_modules but should still be removed from plugin list)
       removeFromStore(name)
       const currentPlugins = openCodeConfig?.plugin || []
       updatePluginList(currentPlugins.filter((p) => p !== name))
-      setLogLines((prev) => [...prev, `Uninstalled ${name}`, ''])
+
+      if (result.exitCode === 0) {
+        setLogLines((prev) => [...prev, `Uninstalled ${name}`, ''])
+      } else {
+        // Package removed from config, but npm/bun had a warning
+        const errLines = formatLogOutput(result.stderr || '')
+        setLogLines((prev) => [...prev, `Removed ${name} from config`, ...errLines, ''])
+      }
     } catch (e: any) {
-      setLogLines((prev) => [...prev, `Error: ${e.message || 'Uninstall failed'}`, ''])
+      // Even on error, remove from config list so it doesn't persist
+      removeFromStore(name)
+      const currentPlugins = openCodeConfig?.plugin || []
+      updatePluginList(currentPlugins.filter((p) => p !== name))
+      setLogLines((prev) => [...prev, `Removed ${name} from config (package manager error: ${e.message || 'unknown'})`, ''])
     } finally { setInstalling(false) }
   }
 
