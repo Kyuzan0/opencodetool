@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useConfigStore } from '../stores'
 import {
   Tabs, Card, TextInput, SelectInput, ToggleSwitch,
   KeyValueEditor, ArrayEditor, JsonEditor, Button, Modal, TextArea
 } from '../components/ui'
-import { Save, RefreshCw, Upload, Download, Plus, Trash2 } from 'lucide-react'
+import { Save, RefreshCw, Upload, Download, Plus, Trash2, ExternalLink } from 'lucide-react'
 import type { AgentPluginConfig, AgentOverride, CategoryConfig, McpConfig } from '@shared/types'
 import { BUILTIN_AGENTS, CATEGORIES } from '@shared/types'
 
@@ -35,6 +35,48 @@ export default function AgentConfigPage(): JSX.Element {
   const [saveLoading, setSaveLoading] = useState(false)
   const [addMcpOpen, setAddMcpOpen] = useState(false)
   const [newMcpName, setNewMcpName] = useState('')
+  const [externalChangeDetected, setExternalChangeDetected] = useState(false)
+  const watchedPathRef = useRef<string | null>(null)
+
+  // File watcher: detect external changes
+  useEffect(() => {
+    const fileWatcherApi = (window.api as any).fileWatcher
+    if (!fileWatcherApi) return
+
+    const handleChange = (changedPath: string): void => {
+      if (agentConfigPath && changedPath === agentConfigPath.path) {
+        setExternalChangeDetected(true)
+      }
+    }
+
+    fileWatcherApi.onChanged(handleChange)
+    return () => {
+      fileWatcherApi.removeListeners()
+    }
+  }, [agentConfigPath])
+
+  // Start/stop watching when agentConfigPath changes
+  useEffect(() => {
+    const fileWatcherApi = (window.api as any).fileWatcher
+    if (!fileWatcherApi) return
+
+    if (watchedPathRef.current && watchedPathRef.current !== agentConfigPath?.path) {
+      fileWatcherApi.unwatch(watchedPathRef.current)
+      watchedPathRef.current = null
+    }
+
+    if (agentConfigPath?.path && agentConfigPath.exists) {
+      fileWatcherApi.watch(agentConfigPath.path)
+      watchedPathRef.current = agentConfigPath.path
+    }
+
+    return () => {
+      if (watchedPathRef.current) {
+        fileWatcherApi.unwatch(watchedPathRef.current)
+        watchedPathRef.current = null
+      }
+    }
+  }, [agentConfigPath?.path])
 
   useEffect(() => { if (!agentConfig) loadConfig() }, [])
 
@@ -70,8 +112,21 @@ export default function AgentConfigPage(): JSX.Element {
     try {
       const r = await window.api.config.read(agentConfigPath.path)
       setAgentConfig(r.data as AgentPluginConfig)
+      setExternalChangeDetected(false)
+      setAgentDirty(false)
     } catch (e: any) { setError(e.message || 'Failed to reload') }
     finally { setLoading(false) }
+  }
+
+  async function handleOpenExternal(): Promise<void> {
+    if (!agentConfigPath?.path) return
+    try {
+      const configApi = window.api.config as any
+      const error = await configApi.openExternal(agentConfigPath.path)
+      if (error) setError(`Gagal membuka editor: ${error}`)
+    } catch (e: any) {
+      setError(e.message || 'Gagal membuka file di editor eksternal')
+    }
   }
 
   async function handleImport(): Promise<void> {
@@ -145,12 +200,26 @@ export default function AgentConfigPage(): JSX.Element {
           {!agentConfigPath && <p className="text-xs text-themed-muted mt-1">No config file found — editing in memory</p>}
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button variant="secondary" onClick={handleOpenExternal} disabled={!agentConfigPath?.path}><ExternalLink size={16} /> Open in Editor</Button>
           <Button variant="secondary" onClick={handleImport}><Upload size={16} /> Import</Button>
           <Button variant="secondary" onClick={handleExport}><Download size={16} /> Export</Button>
           <Button variant="secondary" onClick={handleReload}><RefreshCw size={16} /> Reload</Button>
           <Button onClick={handleSave} disabled={!isAgentDirty} loading={saveLoading}><Save size={16} /> Save</Button>
         </div>
       </div>
+
+      {externalChangeDetected && (
+        <div className="flex items-center justify-between rounded-md border border-warning/50 bg-warning/10 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <RefreshCw size={16} className="text-warning" />
+            <span className="text-sm text-warning">File telah diubah di luar aplikasi. Reload untuk melihat perubahan terbaru.</span>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="secondary" className="text-xs" onClick={() => setExternalChangeDetected(false)}>Abaikan</Button>
+            <Button className="text-xs" onClick={handleReload}>Reload Sekarang</Button>
+          </div>
+        </div>
+      )}
 
       <Tabs tabs={TABS} activeTab={activeTab} onChange={setActiveTab} />
 

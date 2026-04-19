@@ -10,7 +10,8 @@ const api = {
     locations: () => ipcRenderer.invoke('config:locations'),
     projectLocations: (projectPath: string) => ipcRenderer.invoke('config:project-locations', projectPath),
     createDefault: (type: string, path: string) => ipcRenderer.invoke('config:create-default', type, path),
-    backup: (filePath: string) => ipcRenderer.invoke('config:backup', filePath)
+    backup: (filePath: string) => ipcRenderer.invoke('config:backup', filePath),
+    openExternal: (filePath: string) => ipcRenderer.invoke('config:open-external', filePath)
   },
   pm: {
     detect: () => ipcRenderer.invoke('pm:detect'),
@@ -75,6 +76,16 @@ const api = {
     openFile: (options?: Record<string, unknown>) => ipcRenderer.invoke('dialog:open-file', options),
     openDirectory: () => ipcRenderer.invoke('dialog:open-directory'),
     saveFile: (options?: Record<string, unknown>) => ipcRenderer.invoke('dialog:save-file', options)
+  },
+  fileWatcher: {
+    watch: (filePath: string) => ipcRenderer.invoke('file-watcher:watch', filePath),
+    unwatch: (filePath: string) => ipcRenderer.invoke('file-watcher:unwatch', filePath),
+    onChanged: (callback: (filePath: string) => void) => {
+      ipcRenderer.on('file-watcher:changed', (_event, filePath) => callback(filePath))
+    },
+    removeListeners: () => {
+      ipcRenderer.removeAllListeners('file-watcher:changed')
+    }
   }
 }
 

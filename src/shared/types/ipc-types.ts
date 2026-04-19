@@ -41,6 +41,11 @@ export interface IpcChannels {
   'config:locations': { args: []; result: ConfigLocation[] }
   'config:create-default': { args: ['opencode' | 'agent', string]; result: void }
   'config:backup': { args: [string]; result: string }
+  'config:open-external': { args: [string]; result: string }
+
+  // File Watcher
+  'file-watcher:watch': { args: [string]; result: void }
+  'file-watcher:unwatch': { args: [string]; result: void }
 
   // Package Manager
   'pm:detect': { args: []; result: PackageManagerInfo }

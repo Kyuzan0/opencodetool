@@ -9,6 +9,7 @@ interface SettingsState {
   preferredShell: string
   bunPath: string
   autoBackup: boolean
+  openCodeWebPort: string
 }
 
 interface SettingsActions {
@@ -20,6 +21,7 @@ interface SettingsActions {
   setPreferredShell: (shell: string) => void
   setBunPath: (path: string) => void
   setAutoBackup: (enabled: boolean) => void
+  setOpenCodeWebPort: (port: string) => void
 }
 
 export const useSettingsStore = create<SettingsState & SettingsActions>()(
@@ -32,6 +34,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       preferredShell: 'powershell',
       bunPath: '',
       autoBackup: true,
+      openCodeWebPort: '3000',
 
       setTheme: (theme) => set({ theme }),
       setLanguage: (lang) => set({ language: lang }),
@@ -44,7 +47,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         set((s) => ({ recentProjects: s.recentProjects.filter((p) => p !== path) })),
       setPreferredShell: (shell) => set({ preferredShell: shell }),
       setBunPath: (path) => set({ bunPath: path }),
-      setAutoBackup: (enabled) => set({ autoBackup: enabled })
+      setAutoBackup: (enabled) => set({ autoBackup: enabled }),
+      setOpenCodeWebPort: (port) => set({ openCodeWebPort: port })
     }),
     { name: 'opencode-manager-settings' }
   )

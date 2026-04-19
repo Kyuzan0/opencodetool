@@ -11,7 +11,7 @@ export default function DashboardPage(): JSX.Element {
   const { openCodeConfig, configPath } = useConfigStore()
   const { plugins } = usePluginStore()
   const { skills } = useSkillStore()
-  const { recentProjects } = useSettingsStore()
+  const { recentProjects, openCodeWebPort, setOpenCodeWebPort } = useSettingsStore()
   const [pmInfo, setPmInfo] = useState<{ preferred: string; version: string } | null>(null)
   const [backupMode, setBackupMode] = useState<'backup' | 'restore' | null>(null)
   const { toggleTerminal } = useUiStore()
@@ -21,7 +21,6 @@ export default function DashboardPage(): JSX.Element {
   const [runtimeStatus, setRuntimeStatus] = useState<OpenCodeRuntimeOverview | null>(null)
   const [runtimeBusy, setRuntimeBusy] = useState<string | null>(null)
   const [runtimeLog, setRuntimeLog] = useState<string[]>([])
-  const [webPort, setWebPort] = useState('3000')
 
   useEffect(() => {
     loadConfigLocations()
@@ -36,7 +35,7 @@ export default function DashboardPage(): JSX.Element {
   }
 
   function parseWebPort(): number {
-    const parsed = Number(webPort)
+    const parsed = Number(openCodeWebPort)
     if (!Number.isInteger(parsed) || parsed < 1 || parsed > 65535) {
       throw new Error('Port OpenCode Web harus integer antara 1-65535')
     }
@@ -292,8 +291,8 @@ export default function DashboardPage(): JSX.Element {
               <TextInput
                 label="Custom Port"
                 type="number"
-                value={webPort}
-                onChange={setWebPort}
+                value={openCodeWebPort}
+                onChange={setOpenCodeWebPort}
                 placeholder="3000"
                 disabled={!!runtimeBusy}
               />

@@ -146,4 +146,9 @@ app.on('before-quit', () => {
     const { stopAllOpenCodeRuntime } = require('./services/opencode-control-service')
     stopAllOpenCodeRuntime()
   } catch { /* service may not be loaded */ }
+
+  try {
+    const { unwatchAll } = require('./services/file-watcher-service')
+    unwatchAll()
+  } catch { /* service may not be loaded */ }
 })
