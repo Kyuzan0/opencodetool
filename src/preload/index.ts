@@ -16,7 +16,9 @@ const api = {
     detect: () => ipcRenderer.invoke('pm:detect'),
     install: (pluginName: string, configDir: string) => ipcRenderer.invoke('pm:install', pluginName, configDir),
     uninstall: (pluginName: string, configDir: string) => ipcRenderer.invoke('pm:uninstall', pluginName, configDir),
-    list: (configDir: string) => ipcRenderer.invoke('pm:list', configDir)
+    list: (configDir: string) => ipcRenderer.invoke('pm:list', configDir),
+    detectOpenCode: () => ipcRenderer.invoke('pm:detect-opencode'),
+    installOpenCode: (pm: 'npm' | 'bun') => ipcRenderer.invoke('pm:install-opencode', pm)
   },
   shell: {
     detect: () => ipcRenderer.invoke('shell:detect'),
@@ -55,6 +57,11 @@ const api = {
     detect: (searchPaths: string[]) => ipcRenderer.invoke('project:detect', searchPaths),
     select: () => ipcRenderer.invoke('project:select'),
     config: (projectPath: string) => ipcRenderer.invoke('project:config', projectPath)
+  },
+  uninstall: {
+    scan: () => ipcRenderer.invoke('uninstall:scan'),
+    perform: (options: { core: boolean; plugins: boolean; mcp: boolean; skills: boolean }) =>
+      ipcRenderer.invoke('uninstall:perform', options)
   },
   dialog: {
     openFile: (options?: Record<string, unknown>) => ipcRenderer.invoke('dialog:open-file', options),

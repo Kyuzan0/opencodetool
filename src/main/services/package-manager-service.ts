@@ -61,6 +61,28 @@ export async function getPreferredPackageManager(): Promise<'bun' | 'npm'> {
   return bun ? 'bun' : 'npm'
 }
 
+export async function detectOpenCode(): Promise<DetectResult> {
+  try {
+    const version = await runCommand('opencode', ['--version'], undefined, 5000)
+    if (version.exitCode === 0) {
+      const path = await runCommand('where', ['opencode'], undefined, 5000)
+      return { found: true, path: path.stdout.trim().split('\n')[0], version: version.stdout.trim() }
+    }
+  } catch { /* not found */ }
+  return { found: false, path: '', version: '' }
+}
+
+export async function installOpenCode(pm: 'npm' | 'bun'): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+  if (pm === 'bun') {
+    const bun = await detectBun()
+    if (bun) {
+      return runCommand(bun.path, ['add', '-g', 'opencode-ai'], undefined, 60000)
+    }
+    return { stdout: '', stderr: 'bun is not installed', exitCode: 1 }
+  }
+  return runCommand('npm', ['i', '-g', 'opencode-ai'], undefined, 60000)
+}
+
 function parseBunxNpxCommand(input: string): { runner: 'bunx' | 'npx'; args: string[] } | null {
   const trimmed = input.trim()
   const parts = trimmed.split(/\s+/)

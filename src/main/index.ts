@@ -8,6 +8,7 @@ import { registerSkillIpc } from './ipc/skill-ipc'
 import { registerTerminalIpc } from './ipc/terminal-ipc'
 import { registerBackupIpc } from './ipc/backup-ipc'
 import { registerProjectIpc } from './ipc/project-ipc'
+import { registerUninstallIpc } from './ipc/uninstall-ipc'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -110,6 +111,7 @@ app.whenReady().then(() => {
   registerTerminalIpc()
   registerBackupIpc()
   registerProjectIpc()
+  registerUninstallIpc()
 
   // Create menu
   createMenu()

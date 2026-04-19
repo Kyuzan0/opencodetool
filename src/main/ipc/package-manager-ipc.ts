@@ -2,8 +2,10 @@ import { ipcMain } from 'electron'
 import {
   detectBun,
   detectNpm,
+  detectOpenCode,
   getPreferredPackageManager,
   installPlugin,
+  installOpenCode,
   uninstallPlugin,
   listInstalledPackages,
   runCommand
@@ -30,5 +32,13 @@ export function registerPackageManagerIpc(): void {
 
   ipcMain.handle('pm:run-command', async (_event, command: string, args: string[], cwd: string) => {
     return runCommand(command, args, cwd)
+  })
+
+  ipcMain.handle('pm:detect-opencode', async () => {
+    return detectOpenCode()
+  })
+
+  ipcMain.handle('pm:install-opencode', async (_event, pm: 'npm' | 'bun') => {
+    return installOpenCode(pm)
   })
 }
