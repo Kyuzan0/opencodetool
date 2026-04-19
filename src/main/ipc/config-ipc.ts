@@ -6,6 +6,7 @@ import {
   getConfigLocations,
   getProjectConfigLocations,
   createDefaultConfig,
+  getDefaultConfigPath,
   backupConfig
 } from '../services/config-service'
 import { watchFile, unwatchFile, suppressFileChange } from '../services/file-watcher-service'
@@ -39,8 +40,10 @@ export function registerConfigIpc(): void {
     return getProjectConfigLocations(projectPath)
   })
 
-  ipcMain.handle('config:create-default', async (_event, type: 'opencode' | 'agent', path: string) => {
-    await createDefaultConfig(type, path)
+  ipcMain.handle('config:create-default', async (_event, type: 'opencode' | 'agent', path?: string) => {
+    const targetPath = path || getDefaultConfigPath(type)
+    await createDefaultConfig(type, targetPath)
+    return targetPath
   })
 
   ipcMain.handle('config:backup', async (_event, filePath: string) => {

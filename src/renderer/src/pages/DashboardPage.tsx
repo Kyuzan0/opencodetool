@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useConfigStore, usePluginStore, useSkillStore, useSettingsStore, useUiStore } from '../stores'
 import { Card, Button, TextInput } from '../components/ui'
 import BackupDialog from '../components/BackupRestore/BackupDialog'
-import { FileJson, Bot, Puzzle, Wand2, RefreshCw, FolderOpen, CheckCircle, XCircle, Package, Archive, Terminal, Download, AlertCircle, Globe, Play, Square, RotateCcw, Monitor } from 'lucide-react'
+import { FileJson, Bot, Puzzle, Wand2, RefreshCw, FolderOpen, CheckCircle, XCircle, Package, Archive, Terminal, Download, AlertCircle, Globe, Play, Square, RotateCcw, Monitor, FilePlus } from 'lucide-react'
 import type { OpenCodeRuntimeOverview } from '@shared/types'
 
 export default function DashboardPage(): JSX.Element {
@@ -106,10 +106,10 @@ export default function DashboardPage(): JSX.Element {
     }
   }
 
-  async function loadConfigLocations(): Promise<void> {
+  async function loadConfigLocations(forceReload?: boolean): Promise<void> {
     try {
       const locations = await window.api.config.locations()
-      if (locations.length > 0 && !configPath) {
+      if (locations.length > 0 && (!configPath || forceReload)) {
         const first = locations[0]
         useConfigStore.getState().setConfigPath(first)
         const result = await window.api.config.read(first.path)
@@ -158,6 +158,18 @@ export default function DashboardPage(): JSX.Element {
       setInstallLog((prev) => [...prev, `Error: ${e.message || 'Install failed'}`])
     } finally {
       setInstalling(false)
+    }
+  }
+
+  async function handleCreateConfig(): Promise<void> {
+    try {
+      const configApi = window.api.config as any
+      const createdPath: string = await configApi.createDefault('opencode')
+      appendRuntimeLog(`Config dibuat: ${createdPath}`)
+      // Reload config locations to pick up the new file
+      await loadConfigLocations(true)
+    } catch (e: any) {
+      appendRuntimeLog(`Gagal membuat config: ${e.message || 'unknown error'}`)
     }
   }
 
@@ -274,6 +286,26 @@ export default function DashboardPage(): JSX.Element {
                 ))}
               </div>
             )}
+          </div>
+        </Card>
+      )}
+
+      {!configPath && (
+        <Card title="Config File Tidak Ditemukan">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <AlertCircle size={18} className="text-warning" />
+              <p className="text-sm text-themed-secondary">
+                File <code className="rounded bg-primary px-1 py-0.5 text-xs">opencode.json</code> tidak ditemukan.
+                {(ocStatus?.found || ocAppStatus?.found)
+                  ? ' OpenCode terdeteksi tapi belum ada file konfigurasi.'
+                  : ''}
+                {' '}Buat file config default untuk mulai menggunakan OpenCode Manager.
+              </p>
+            </div>
+            <Button onClick={handleCreateConfig}>
+              <FilePlus size={16} /> Buat Config Default
+            </Button>
           </div>
         </Card>
       )}

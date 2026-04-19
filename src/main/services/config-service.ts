@@ -194,7 +194,29 @@ export async function createDefaultConfig(
     type === 'opencode'
       ? {
           $schema: 'https://opencode.ai/config.json',
-          provider: {},
+          provider: {
+            'my-provider': {
+              npm: '@ai-sdk/openai-compatible',
+              name: 'My Provider',
+              options: {
+                baseURL: 'https://api.example.com/v1',
+                apiKey: 'your-api-key'
+              },
+              models: {
+                'default-model': {
+                  name: 'Default Model',
+                  limit: {
+                    context: 200000,
+                    output: 64000
+                  },
+                  modalities: {
+                    input: ['text', 'image'],
+                    output: ['text']
+                  }
+                }
+              }
+            }
+          },
           permission: {
             bash: 'ask',
             read: 'allow',
@@ -207,11 +229,41 @@ export async function createDefaultConfig(
       : {
           $schema:
             'https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json',
-          agents: {},
-          categories: {}
+          agents: {
+            hephaestus: { model: 'my-provider/default-model' },
+            oracle: { model: 'my-provider/default-model' },
+            librarian: { model: 'my-provider/default-model' },
+            explore: { model: 'my-provider/default-model' },
+            'multimodal-looker': { model: 'my-provider/default-model' },
+            prometheus: { model: 'my-provider/default-model' },
+            metis: { model: 'my-provider/default-model' },
+            momus: { model: 'my-provider/default-model' },
+            atlas: { model: 'my-provider/default-model' },
+            'sisyphus-junior': { model: 'my-provider/default-model' }
+          },
+          categories: {
+            'visual-engineering': { model: 'my-provider/default-model' },
+            ultrabrain: { model: 'my-provider/default-model' },
+            deep: { model: 'my-provider/default-model' },
+            artistry: { model: 'my-provider/default-model' },
+            quick: { model: 'my-provider/default-model' },
+            'unspecified-low': { model: 'my-provider/default-model' },
+            'unspecified-high': { model: 'my-provider/default-model' },
+            writing: { model: 'my-provider/default-model' }
+          }
         }
 
   await writeFile(path, JSON.stringify(defaultConfig, null, 2) + '\n', 'utf-8')
+}
+
+/**
+ * Get the default config file path for the current OS.
+ */
+export function getDefaultConfigPath(type: 'opencode' | 'agent'): string {
+  const home = homedir()
+  const configDir = join(home, '.config', 'opencode')
+  const filename = type === 'opencode' ? 'opencode.json' : 'oh-my-openagent.json'
+  return join(configDir, filename)
 }
 
 export function mergeConfigs(

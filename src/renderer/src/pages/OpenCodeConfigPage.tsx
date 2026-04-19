@@ -4,7 +4,7 @@ import {
   Tabs, Card, TextInput, SelectInput, ToggleSwitch,
   KeyValueEditor, ArrayEditor, JsonEditor, Button, Modal
 } from '../components/ui'
-import { Save, RefreshCw, Upload, Download, Plus, Trash2, ExternalLink } from 'lucide-react'
+import { Save, RefreshCw, Upload, Download, Plus, Trash2, ExternalLink, FilePlus } from 'lucide-react'
 import type { OpenCodeConfig } from '@shared/types'
 import { PERMISSION_KEYS } from '@shared/types'
 
@@ -245,11 +245,32 @@ export default function OpenCodeConfigPage(): JSX.Element {
     upf(selProv, 'models', { ...p.models, [mk]: { ...m, [field]: val } })
   }
 
+  async function handleCreateConfig(): Promise<void> {
+    setLoading(true)
+    try {
+      const configApi = window.api.config as any
+      const createdPath: string = await configApi.createDefault('opencode')
+      // Reload to pick up the new file
+      await loadConfig()
+    } catch (e: any) {
+      setError(e.message || 'Gagal membuat config')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (isLoading) return <div className="flex items-center justify-center py-20 text-themed-muted">Loading config...</div>
   if (!openCodeConfig) return (
     <div className="flex flex-col items-center justify-center py-20 gap-4">
-      <p className="text-themed-muted">No config loaded</p>
-      <Button onClick={loadConfig}>Load Config</Button>
+      <p className="text-themed-muted">File config tidak ditemukan</p>
+      <p className="text-xs text-themed-muted max-w-md text-center">
+        Buat file <code className="rounded bg-primary px-1 py-0.5">opencode.json</code> default
+        di <code className="rounded bg-primary px-1 py-0.5">~/.config/opencode/</code> dengan template provider siap pakai.
+      </p>
+      <div className="flex gap-2">
+        <Button onClick={handleCreateConfig}><FilePlus size={16} /> Buat Config Default</Button>
+        <Button variant="secondary" onClick={loadConfig}>Coba Muat Ulang</Button>
+      </div>
     </div>
   )
 

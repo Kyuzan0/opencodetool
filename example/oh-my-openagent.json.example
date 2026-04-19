@@ -1,0 +1,61 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json",
+  "agents": {
+    "hephaestus": {
+      "model": "enowxlabs/claude-opus-4.6"
+    },
+    "oracle": {
+      "model": "enowxlabs/claude-sonnet-4.5"
+    },
+    "librarian": {
+      "model": "enowxlabs/gemini-3.1-pro"
+    },
+    "explore": {
+      "model": "enowxlabs/gemini-3.1-pro"
+    },
+    "multimodal-looker": {
+      "model": "enowxlabs/gemini-3.1-pro"
+    },
+    "prometheus": {
+      "model": "enowxlabs/claude-sonnet-4.5"
+    },
+    "metis": {
+      "model": "enowxlabs/claude-opus-4.6"
+    },
+    "momus": {
+      "model": "enowxlabs/claude-sonnet-4.5"
+    },
+    "atlas": {
+      "model": "enowxlabs/claude-sonnet-4.5"
+    },
+    "sisyphus-junior": {
+      "model": "enowxlabs/gemini-3.1-flash"
+    }
+  },
+  "categories": {
+    "visual-engineering": {
+      "model": "enowxlabs/gemini-3.1-pro"
+    },
+    "ultrabrain": {
+      "model": "enowxlabs/claude-opus-4.6"
+    },
+    "deep": {
+      "model": "enowxlabs/claude-opus-4.6"
+    },
+    "artistry": {
+      "model": "enowxlabs/claude-sonnet-4.5"
+    },
+    "quick": {
+      "model": "enowxlabs/gemini-3.1-flash"
+    },
+    "unspecified-low": {
+      "model": "enowxlabs/gemini-3.1-flash"
+    },
+    "unspecified-high": {
+      "model": "enowxlabs/claude-sonnet-4.5"
+    },
+    "writing": {
+      "model": "enowxlabs/claude-sonnet-4.5"
+    }
+  }
+}

@@ -9,7 +9,7 @@ const api = {
     validate: (data: Record<string, unknown>, schema: string) => ipcRenderer.invoke('config:validate', data, schema),
     locations: () => ipcRenderer.invoke('config:locations'),
     projectLocations: (projectPath: string) => ipcRenderer.invoke('config:project-locations', projectPath),
-    createDefault: (type: string, path: string) => ipcRenderer.invoke('config:create-default', type, path),
+    createDefault: (type: string, path?: string) => ipcRenderer.invoke('config:create-default', type, path),
     backup: (filePath: string) => ipcRenderer.invoke('config:backup', filePath),
     openExternal: (filePath: string) => ipcRenderer.invoke('config:open-external', filePath)
   },

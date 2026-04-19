@@ -4,7 +4,7 @@ import {
   Tabs, Card, TextInput, SelectInput, ToggleSwitch,
   KeyValueEditor, ArrayEditor, JsonEditor, Button, Modal, TextArea
 } from '../components/ui'
-import { Save, RefreshCw, Upload, Download, Plus, Trash2, ExternalLink } from 'lucide-react'
+import { Save, RefreshCw, Upload, Download, Plus, Trash2, ExternalLink, FilePlus } from 'lucide-react'
 import type { AgentPluginConfig, AgentOverride, CategoryConfig, McpConfig } from '@shared/types'
 import { BUILTIN_AGENTS, CATEGORIES } from '@shared/types'
 
@@ -187,7 +187,34 @@ export default function AgentConfigPage(): JSX.Element {
     uc('mcps', mcps)
   }
 
+  async function handleCreateAgentConfig(): Promise<void> {
+    setLoading(true)
+    try {
+      const configApi = window.api.config as any
+      const createdPath: string = await configApi.createDefault('agent')
+      await loadConfig()
+    } catch (e: any) {
+      setError(e.message || 'Gagal membuat agent config')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (isLoading) return <div className="flex items-center justify-center py-20 text-themed-muted">Loading config...</div>
+
+  if (!agentConfig && !agentConfigPath) return (
+    <div className="flex flex-col items-center justify-center py-20 gap-4">
+      <p className="text-themed-muted">File agent config tidak ditemukan</p>
+      <p className="text-xs text-themed-muted max-w-md text-center">
+        Buat file <code className="rounded bg-primary px-1 py-0.5">oh-my-openagent.json</code> default
+        di <code className="rounded bg-primary px-1 py-0.5">~/.config/opencode/</code> dengan template agents dan categories siap pakai.
+      </p>
+      <div className="flex gap-2">
+        <Button onClick={handleCreateAgentConfig}><FilePlus size={16} /> Buat Agent Config Default</Button>
+        <Button variant="secondary" onClick={loadConfig}>Coba Muat Ulang</Button>
+      </div>
+    </div>
+  )
 
   const config = agentConfig || { agents: {}, categories: {} }
 
