@@ -34,7 +34,7 @@ export default function SettingsPage(): JSX.Element {
   const [showUninstallModal, setShowUninstallModal] = useState(false)
   const [uninstallTargets, setUninstallTargets] = useState<UninstallTargets | null>(null)
   const [uninstallOpts, setUninstallOpts] = useState<UninstallOptions>({
-    cli: true, core: true, plugins: true, mcp: true, skills: true, sessions: true, projectData: false
+    cli: true, core: true, plugins: true, mcp: true, skills: true, sessions: true, projectData: true
   })
   const [uninstalling, setUninstalling] = useState(false)
   const [uninstallResult, setUninstallResult] = useState<{ removed: string[]; errors: string[] } | null>(null)
@@ -50,7 +50,7 @@ export default function SettingsPage(): JSX.Element {
       setUninstallTargets(targets)
       setUninstallOpts({
         cli: true, core: true, plugins: true, mcp: true, skills: true,
-        sessions: true, projectData: false
+        sessions: true, projectData: true
       })
       setUninstallResult(null)
       setUninstallDone(false)
@@ -80,12 +80,12 @@ export default function SettingsPage(): JSX.Element {
       // Build project paths from scanned targets if projectData is enabled
       const opts: UninstallOptions = { ...uninstallOpts }
       if (opts.projectData && uninstallTargets?.projectData.length) {
-        // Extract parent project paths from the .opencode/.kilo/.sisyphus paths
+        // Extract parent project paths from the .opencode/.sisyphus paths
         opts.projectPaths = [...new Set(
           uninstallTargets.projectData.map(p => {
-            // e.g. D:\laragon\www\app\projek3\.sisyphus -> D:\laragon\www\app\projek3
+            // e.g. D:\laragon\www\app\project\.sisyphus -> D:\laragon\www\app\project
             const parts = p.replace(/\\/g, '/').split('/')
-            parts.pop() // remove .opencode/.kilo/.sisyphus
+            parts.pop() // remove .opencode/.sisyphus
             return parts.join('\\')
           })
         )]
@@ -254,7 +254,7 @@ export default function SettingsPage(): JSX.Element {
             <div className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger/10 p-3">
               <AlertTriangle size={18} className="text-danger shrink-0" />
               <p className="text-xs text-danger">
-                This will completely remove ALL OpenCode/Kilo data so reinstallation starts fresh.
+                This will completely remove ALL OpenCode data so reinstallation starts fresh.
                 This action is irreversible.
               </p>
             </div>
@@ -269,7 +269,7 @@ export default function SettingsPage(): JSX.Element {
               />
               <ToggleSwitch
                 label="Config Directories (ENTIRE)"
-                description={`~/.config/opencode/, ~/.config/kilo/, %APPDATA%/opencode/ — removes everything${uninstallTargets ? ` (${uninstallTargets.core.length} dirs)` : ''}`}
+                description={`~/.config/opencode/, %APPDATA%/opencode/, %LOCALAPPDATA%/opencode/ — removes everything${uninstallTargets ? ` (${uninstallTargets.core.length} dirs)` : ''}`}
                 checked={uninstallOpts.core}
                 onChange={(v) => setUninstallOpts((o) => ({ ...o, core: v }))}
               />
@@ -305,7 +305,7 @@ export default function SettingsPage(): JSX.Element {
                 onChange={(v) => setUninstallOpts((o) => ({ ...o, sessions: v }))}
               />
               <ToggleSwitch
-                label="Project State (.opencode/.kilo/.sisyphus)"
+                label="Project State (.opencode/.sisyphus)"
                 description={`Remove state directories from all detected projects${uninstallTargets ? ` (${uninstallTargets.projectData.length} found)` : ''}`}
                 checked={uninstallOpts.projectData}
                 onChange={(v) => setUninstallOpts((o) => ({ ...o, projectData: v }))}

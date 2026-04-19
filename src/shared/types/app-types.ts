@@ -50,6 +50,22 @@ export interface BackupInfo {
   fileCount: number
 }
 
+export interface OpenCodeRuntimeStatus {
+  mode: 'cli' | 'web'
+  running: boolean
+  pid: number | null
+  startedAt: string | null
+  port: number | null
+  command: string | null
+  args: string[]
+  error: string | null
+}
+
+export interface OpenCodeRuntimeOverview {
+  cli: OpenCodeRuntimeStatus
+  web: OpenCodeRuntimeStatus
+}
+
 export interface Toast {
   id: string
   type: 'success' | 'error' | 'warning' | 'info'

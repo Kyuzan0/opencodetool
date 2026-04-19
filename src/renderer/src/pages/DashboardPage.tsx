@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useConfigStore, usePluginStore, useSkillStore, useSettingsStore, useUiStore } from '../stores'
-import { Card, Button } from '../components/ui'
+import { Card, Button, TextInput } from '../components/ui'
 import BackupDialog from '../components/BackupRestore/BackupDialog'
-import { FileJson, Bot, Puzzle, Wand2, RefreshCw, FolderOpen, CheckCircle, XCircle, Package, Archive, Terminal, Download, AlertCircle } from 'lucide-react'
+import { FileJson, Bot, Puzzle, Wand2, RefreshCw, FolderOpen, CheckCircle, XCircle, Package, Archive, Terminal, Download, AlertCircle, Globe, Play, Square, RotateCcw } from 'lucide-react'
+import type { OpenCodeRuntimeOverview } from '@shared/types'
 
 export default function DashboardPage(): JSX.Element {
   const navigate = useNavigate()
@@ -17,12 +18,71 @@ export default function DashboardPage(): JSX.Element {
   const [ocStatus, setOcStatus] = useState<{ found: boolean; version: string } | null>(null)
   const [installing, setInstalling] = useState(false)
   const [installLog, setInstallLog] = useState<string[]>([])
+  const [runtimeStatus, setRuntimeStatus] = useState<OpenCodeRuntimeOverview | null>(null)
+  const [runtimeBusy, setRuntimeBusy] = useState<string | null>(null)
+  const [runtimeLog, setRuntimeLog] = useState<string[]>([])
+  const [webPort, setWebPort] = useState('3000')
 
   useEffect(() => {
     loadConfigLocations()
     detectPM()
     detectOpenCode()
+    refreshRuntimeStatus()
   }, [])
+
+  function appendRuntimeLog(message: string): void {
+    const stamp = new Date().toLocaleTimeString()
+    setRuntimeLog((prev) => [`[${stamp}] ${message}`, ...prev].slice(0, 80))
+  }
+
+  function parseWebPort(): number {
+    const parsed = Number(webPort)
+    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 65535) {
+      throw new Error('Port OpenCode Web harus integer antara 1-65535')
+    }
+    return parsed
+  }
+
+  async function refreshRuntimeStatus(): Promise<void> {
+    try {
+      const status = await (window.api as any).opencode.status()
+      setRuntimeStatus(status)
+    } catch (e: any) {
+      appendRuntimeLog(`Gagal membaca status runtime: ${e.message || 'unknown error'}`)
+    }
+  }
+
+  async function handleRuntimeAction(mode: 'cli' | 'web', action: 'start' | 'stop' | 'restart'): Promise<void> {
+    const busyKey = `${mode}:${action}`
+    setRuntimeBusy(busyKey)
+    try {
+      const opencodeApi = (window.api as any).opencode
+      if (!opencodeApi) throw new Error('OpenCode runtime API tidak tersedia')
+
+      let result: { running: boolean; port?: number | null }
+      if (action === 'stop') {
+        result = await opencodeApi.stop(mode)
+      } else if (mode === 'web') {
+        const port = parseWebPort()
+        result = action === 'start'
+          ? await opencodeApi.start(mode, port)
+          : await opencodeApi.restart(mode, port)
+      } else {
+        result = action === 'start'
+          ? await opencodeApi.start(mode)
+          : await opencodeApi.restart(mode)
+      }
+
+      await refreshRuntimeStatus()
+      const modeLabel = mode === 'cli' ? 'OpenCode CLI' : 'OpenCode Web'
+      const portSuffix = result.port ? ` (port ${result.port})` : ''
+      appendRuntimeLog(`${modeLabel} ${action} -> ${result.running ? 'running' : 'stopped'}${portSuffix}`)
+    } catch (e: any) {
+      appendRuntimeLog(`Error ${mode} ${action}: ${e.message || 'unknown error'}`)
+    } finally {
+      setRuntimeBusy(null)
+    }
+  }
 
   async function loadConfigLocations(): Promise<void> {
     try {
@@ -171,6 +231,116 @@ export default function DashboardPage(): JSX.Element {
           <Button variant="secondary" onClick={() => loadConfigLocations()}><RefreshCw size={16} /> Reload</Button>
         </div>
       </Card>
+
+      <Card title="OpenCode Runtime Control" description="Start/Stop/Restart OpenCode CLI and OpenCode Web">
+        <div className="space-y-4">
+          <div className="rounded-md border border-border-default p-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Terminal size={16} className="text-accent" />
+                <span className="text-sm font-medium text-themed">OpenCode CLI</span>
+              </div>
+              <div className="flex items-center gap-1 text-xs">
+                {runtimeStatus?.cli.running ? (
+                  <><CheckCircle size={14} className="text-success" /><span className="text-success">Running (PID {runtimeStatus.cli.pid ?? '-'})</span></>
+                ) : (
+                  <><XCircle size={14} className="text-themed-muted" /><span className="text-themed-muted">Stopped</span></>
+                )}
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="secondary"
+                disabled={!!runtimeBusy || !!runtimeStatus?.cli.running}
+                onClick={() => handleRuntimeAction('cli', 'start')}
+              >
+                <Play size={16} /> Start
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={!!runtimeBusy || !runtimeStatus?.cli.running}
+                onClick={() => handleRuntimeAction('cli', 'stop')}
+              >
+                <Square size={16} /> Stop
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={!!runtimeBusy}
+                onClick={() => handleRuntimeAction('cli', 'restart')}
+              >
+                <RotateCcw size={16} /> Restart
+              </Button>
+            </div>
+          </div>
+
+          <div className="rounded-md border border-border-default p-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Globe size={16} className="text-accent" />
+                <span className="text-sm font-medium text-themed">OpenCode Web</span>
+              </div>
+              <div className="flex items-center gap-1 text-xs">
+                {runtimeStatus?.web.running ? (
+                  <><CheckCircle size={14} className="text-success" /><span className="text-success">Running (port {runtimeStatus.web.port ?? '-'})</span></>
+                ) : (
+                  <><XCircle size={14} className="text-themed-muted" /><span className="text-themed-muted">Stopped</span></>
+                )}
+              </div>
+            </div>
+
+            <div className="mb-3 max-w-[220px]">
+              <TextInput
+                label="Custom Port"
+                type="number"
+                value={webPort}
+                onChange={setWebPort}
+                placeholder="3000"
+                disabled={!!runtimeBusy}
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="secondary"
+                disabled={!!runtimeBusy || !!runtimeStatus?.web.running}
+                onClick={() => handleRuntimeAction('web', 'start')}
+              >
+                <Play size={16} /> Start
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={!!runtimeBusy || !runtimeStatus?.web.running}
+                onClick={() => handleRuntimeAction('web', 'stop')}
+              >
+                <Square size={16} /> Stop
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={!!runtimeBusy}
+                onClick={() => handleRuntimeAction('web', 'restart')}
+              >
+                <RotateCcw size={16} /> Restart
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={!!runtimeBusy}
+                onClick={refreshRuntimeStatus}
+              >
+                <RefreshCw size={16} /> Refresh Status
+              </Button>
+            </div>
+          </div>
+
+          {runtimeLog.length > 0 && (
+            <div className="max-h-40 overflow-auto rounded-md bg-primary p-2 font-mono text-xs text-themed-muted">
+              {runtimeLog.map((line, idx) => (
+                <div key={`${line}-${idx}`}>{line}</div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Card>
+
       {backupMode && <BackupDialog open={!!backupMode} onClose={() => setBackupMode(null)} mode={backupMode} />}
       {recentProjects.length > 0 && (
         <Card title="Recent Projects">

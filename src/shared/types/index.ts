@@ -38,6 +38,8 @@ export type {
   ShellInfo,
   ProjectInfo,
   BackupInfo,
+  OpenCodeRuntimeStatus,
+  OpenCodeRuntimeOverview,
   Toast,
   Modal
 } from './app-types'

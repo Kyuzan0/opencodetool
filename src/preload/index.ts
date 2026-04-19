@@ -65,6 +65,12 @@ const api = {
     perform: (options: { cli: boolean; core: boolean; plugins: boolean; mcp: boolean; skills: boolean; sessions: boolean; projectData: boolean; projectPaths?: string[] }) =>
       ipcRenderer.invoke('uninstall:perform', options)
   },
+  opencode: {
+    status: () => ipcRenderer.invoke('opencode:status'),
+    start: (mode: 'cli' | 'web', port?: number) => ipcRenderer.invoke('opencode:start', mode, port),
+    stop: (mode: 'cli' | 'web') => ipcRenderer.invoke('opencode:stop', mode),
+    restart: (mode: 'cli' | 'web', port?: number) => ipcRenderer.invoke('opencode:restart', mode, port)
+  },
   dialog: {
     openFile: (options?: Record<string, unknown>) => ipcRenderer.invoke('dialog:open-file', options),
     openDirectory: () => ipcRenderer.invoke('dialog:open-directory'),

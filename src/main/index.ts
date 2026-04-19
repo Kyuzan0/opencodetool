@@ -9,6 +9,7 @@ import { registerTerminalIpc } from './ipc/terminal-ipc'
 import { registerBackupIpc } from './ipc/backup-ipc'
 import { registerProjectIpc } from './ipc/project-ipc'
 import { registerUninstallIpc } from './ipc/uninstall-ipc'
+import { registerOpenCodeControlIpc } from './ipc/opencode-control-ipc'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -112,6 +113,7 @@ app.whenReady().then(() => {
   registerBackupIpc()
   registerProjectIpc()
   registerUninstallIpc()
+  registerOpenCodeControlIpc()
 
   // Create menu
   createMenu()
@@ -138,5 +140,10 @@ app.on('before-quit', () => {
   try {
     const { destroyAllTerminals } = require('./services/terminal-service')
     destroyAllTerminals()
+  } catch { /* service may not be loaded */ }
+
+  try {
+    const { stopAllOpenCodeRuntime } = require('./services/opencode-control-service')
+    stopAllOpenCodeRuntime()
   } catch { /* service may not be loaded */ }
 })

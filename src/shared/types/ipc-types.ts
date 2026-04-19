@@ -1,6 +1,6 @@
 import type { OpenCodeConfig } from './opencode-config'
 import type { AgentPluginConfig } from './agent-config'
-import type { ConfigLocation, PluginInfo, SkillInfo, ShellInfo, ProjectInfo, BackupInfo } from './app-types'
+import type { ConfigLocation, PluginInfo, SkillInfo, ShellInfo, ProjectInfo, BackupInfo, OpenCodeRuntimeOverview, OpenCodeRuntimeStatus } from './app-types'
 
 // Config IPC
 export interface ConfigReadResult {
@@ -80,4 +80,10 @@ export interface IpcChannels {
   'dialog:open-file': { args: [Record<string, unknown>?]; result: string | null }
   'dialog:open-directory': { args: []; result: string | null }
   'dialog:save-file': { args: [Record<string, unknown>?]; result: string | null }
+
+  // OpenCode Runtime Control
+  'opencode:status': { args: []; result: OpenCodeRuntimeOverview }
+  'opencode:start': { args: ['cli' | 'web', number?]; result: OpenCodeRuntimeStatus }
+  'opencode:stop': { args: ['cli' | 'web']; result: OpenCodeRuntimeStatus }
+  'opencode:restart': { args: ['cli' | 'web', number?]; result: OpenCodeRuntimeStatus }
 }
