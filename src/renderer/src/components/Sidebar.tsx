@@ -29,23 +29,27 @@ export default function Sidebar(): JSX.Element {
 
   return (
     <aside
-      className={`flex h-full flex-col border-r border-themed bg-themed-sidebar transition-all duration-200 ${
+      className={`relative flex h-full flex-col border-r border-[var(--color-border-subtle)] bg-themed-sidebar transition-all duration-300 ease-out ${
         sidebarCollapsed ? 'w-16' : 'w-60'
       }`}
     >
-      <div className="flex h-14 items-center justify-between border-b border-themed px-4">
+      {/* Header */}
+      <div className="flex h-14 items-center justify-between px-4">
         {!sidebarCollapsed && (
-          <span className="text-sm font-semibold text-themed">OpenCode Manager</span>
+          <span className="text-sm font-semibold text-themed tracking-tight">
+            OpenCode Manager
+          </span>
         )}
         <button
           onClick={toggleSidebar}
-          className="rounded p-1 text-themed-muted hover:bg-black/10 dark:hover:bg-white/10 hover:text-themed"
+          className="rounded-lg p-1.5 text-themed-muted hover:bg-white/[0.04] hover:text-themed transition-all"
         >
-          {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
       </div>
 
-      <nav className="flex-1 space-y-1 p-2">
+      {/* Navigation */}
+      <nav className="flex-1 space-y-0.5 px-2 py-1">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path
           const Icon = item.icon
@@ -53,23 +57,28 @@ export default function Sidebar(): JSX.Element {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+              className={`group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-200 ${
                 isActive
-                  ? 'bg-accent/20 text-accent'
-                  : 'text-themed-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-themed'
+                  ? 'bg-accent/[0.08] text-accent'
+                  : 'text-themed-muted hover:bg-white/[0.03] hover:text-themed-secondary'
               }`}
               title={sidebarCollapsed ? item.label : undefined}
             >
-              <Icon size={20} />
+              {/* Active indicator bar */}
+              {isActive && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-accent shadow-[0_0_8px_rgba(0,212,170,0.4)]" />
+              )}
+              <Icon size={18} strokeWidth={isActive ? 2 : 1.5} />
               {!sidebarCollapsed && <span>{item.label}</span>}
             </button>
           )
         })}
       </nav>
 
+      {/* Footer */}
       {!sidebarCollapsed && (
-        <div className="border-t border-themed p-3">
-          <p className="truncate text-xs text-themed-muted">v1.0.0</p>
+        <div className="border-t border-[var(--color-border-subtle)] px-4 py-3">
+          <p className="truncate text-[11px] text-themed-muted font-mono">v1.0.0</p>
         </div>
       )}
     </aside>

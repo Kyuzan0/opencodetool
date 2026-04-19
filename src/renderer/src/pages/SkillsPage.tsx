@@ -107,7 +107,7 @@ export default function SkillsPage(): JSX.Element {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-themed">Skill Manager</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-themed">Skill Manager</h1>
         <div className="flex items-center gap-2">
           <Button variant="secondary" onClick={handleDuplicate} disabled={!selectedSkill}>
             <Copy size={16} /> Duplicate
@@ -120,7 +120,7 @@ export default function SkillsPage(): JSX.Element {
 
       <div className="flex flex-col md:flex-row gap-4 min-h-[500px]">
         {/* Skill List */}
-        <div className="w-full md:w-64 md:shrink-0 space-y-1 overflow-auto rounded-md border border-border-default bg-secondary/20 p-2 max-h-64 md:max-h-none">
+        <div className="w-full md:w-64 md:shrink-0 space-y-1 overflow-auto rounded-xl border border-[var(--color-border-subtle)] bg-surface/20 p-2 max-h-64 md:max-h-none">
           {skills.length === 0 && (
             <p className="p-4 text-center text-sm text-themed-muted">No skills found</p>
           )}
@@ -133,15 +133,15 @@ export default function SkillsPage(): JSX.Element {
                 }
                 setSelectedSkill(skill)
               }}
-              className={`flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${
+              className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-colors ${
                 selectedSkill?.name === skill.name
-                  ? 'bg-accent/10 text-accent'
-                  : 'text-themed-secondary hover:bg-black/5 dark:hover:bg-white/5 hover:text-themed'
+                  ? 'bg-accent/[0.08] text-accent'
+                  : 'text-themed-secondary hover:bg-surface/40 hover:text-themed'
               }`}
             >
               <GripVertical size={14} className="text-themed-muted shrink-0" />
               <div className="min-w-0 flex-1">
-                <div className="truncate font-medium">{skill.name}</div>
+                <div className="truncate font-medium text-[13px]">{skill.name}</div>
                 <div className="truncate text-xs text-themed-muted">{skill.description}</div>
               </div>
             </div>
@@ -154,8 +154,8 @@ export default function SkillsPage(): JSX.Element {
             <>
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-themed">{selectedSkill.name}</h2>
-                  <p className="text-xs text-themed-muted" title={selectedSkill.path}>{selectedSkill.path}</p>
+                  <h2 className="text-lg font-semibold tracking-tight text-themed">{selectedSkill.name}</h2>
+                  <p className="font-mono text-[11px] text-themed-muted" title={selectedSkill.path}>{selectedSkill.path}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -187,7 +187,7 @@ export default function SkillsPage(): JSX.Element {
           ) : (
             <div className="flex h-full items-center justify-center text-themed-muted">
               <div className="text-center">
-                <FileText size={48} className="mx-auto mb-4 text-themed-muted" />
+                <FileText size={40} className="mx-auto mb-4 text-themed-muted opacity-50" />
                 <p>Select a skill to edit or create a new one</p>
               </div>
             </div>

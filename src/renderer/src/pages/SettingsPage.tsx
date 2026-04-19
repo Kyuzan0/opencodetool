@@ -116,7 +116,10 @@ export default function SettingsPage(): JSX.Element {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-themed">Settings</h1>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-themed">Settings</h1>
+        <p className="text-[13px] text-themed-muted mt-1">Configure application preferences and paths</p>
+      </div>
 
       <Card title="Appearance">
         <div className="space-y-4">
@@ -165,15 +168,15 @@ export default function SettingsPage(): JSX.Element {
 
       <Card title="About">
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between py-1">
             <span className="text-sm text-themed-secondary">App Version</span>
             <span className="text-sm text-themed">1.0.0</span>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between py-1">
             <span className="text-sm text-themed-secondary">Electron</span>
             <span className="text-sm text-themed">{window.electron?.process?.versions?.electron || 'N/A'}</span>
           </div>
-          <div className="space-y-2 pt-2 border-t border-border-default">
+          <div className="space-y-2 pt-2 border-t border-[var(--color-border-subtle)]">
             <a href="https://opencode.ai" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-accent hover:text-accent-hover"><ExternalLink size={14} /> OpenCode Documentation</a>
             <a href="https://github.com/code-yeongyu/oh-my-openagent" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-accent hover:text-accent-hover"><ExternalLink size={14} /> oh-my-openagent Documentation</a>
           </div>
@@ -194,7 +197,7 @@ export default function SettingsPage(): JSX.Element {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-medium text-danger">Complete Uninstall OpenCode</span>
-                <p className="text-xs text-themed-muted">Remove ALL OpenCode data: CLI, configs, plugins, sessions, databases, and project state</p>
+                <p className="text-xs text-danger/60">Remove ALL OpenCode data: CLI, configs, plugins, sessions, databases, and project state</p>
               </div>
               <Button variant="danger" onClick={openUninstallModal}>
                 <Trash2 size={16} /> Uninstall
@@ -232,7 +235,7 @@ export default function SettingsPage(): JSX.Element {
             {uninstallResult.removed.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-success mb-2">Removed ({uninstallResult.removed.length})</p>
-                <div className="max-h-40 overflow-auto rounded-md bg-primary p-2 font-mono text-xs text-themed-muted">
+                <div className="max-h-40 overflow-auto rounded-xl bg-primary p-3 border border-[var(--color-border-subtle)] font-mono text-xs text-themed-muted">
                   {uninstallResult.removed.map((p, i) => <div key={i}>{p}</div>)}
                 </div>
               </div>
@@ -240,7 +243,7 @@ export default function SettingsPage(): JSX.Element {
             {uninstallResult.errors.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-danger mb-2">Errors ({uninstallResult.errors.length})</p>
-                <div className="max-h-40 overflow-auto rounded-md bg-primary p-2 font-mono text-xs text-danger">
+                <div className="max-h-40 overflow-auto rounded-xl bg-primary p-3 border border-[var(--color-border-subtle)] font-mono text-xs text-danger">
                   {uninstallResult.errors.map((e, i) => <div key={i}>{e}</div>)}
                 </div>
               </div>
@@ -251,7 +254,7 @@ export default function SettingsPage(): JSX.Element {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger/10 p-3">
+            <div className="flex items-center gap-2 rounded-xl border border-danger/20 bg-danger/[0.04] p-4">
               <AlertTriangle size={18} className="text-danger shrink-0" />
               <p className="text-xs text-danger">
                 This will completely remove ALL OpenCode data so reinstallation starts fresh.
@@ -259,63 +262,74 @@ export default function SettingsPage(): JSX.Element {
               </p>
             </div>
 
-            <div className="space-y-3">
-              <ToggleSwitch
-                label="OpenCode CLI"
-                description={`opencode-ai global package (npm/bun)${uninstallTargets ? ` (${uninstallTargets.cli.length > 0 ? 'installed' : 'not found'})` : ''}`}
-                checked={uninstallOpts.cli}
-                onChange={(v) => setUninstallOpts((o) => ({ ...o, cli: v }))}
-                disabled={!uninstallTargets?.cli.length}
-              />
-              <ToggleSwitch
-                label="Config Directories (ENTIRE)"
-                description={`~/.config/opencode/, %APPDATA%/opencode/, %LOCALAPPDATA%/opencode/ — removes everything${uninstallTargets ? ` (${uninstallTargets.core.length} dirs)` : ''}`}
-                checked={uninstallOpts.core}
-                onChange={(v) => setUninstallOpts((o) => ({ ...o, core: v }))}
-              />
-              <ToggleSwitch
-                label="Plugins & Dependencies"
-                description={`node_modules, package.json, lock files${uninstallTargets ? ` (${uninstallTargets.plugins.length} found)` : ''}`}
-                checked={uninstallOpts.plugins}
-                onChange={(v) => setUninstallOpts((o) => ({ ...o, plugins: v }))}
-              />
-              <ToggleSwitch
-                label="MCP Servers"
-                description={`MCP configuration files and directories${uninstallTargets ? ` (${uninstallTargets.mcp.length} found)` : ''}`}
-                checked={uninstallOpts.mcp}
-                onChange={(v) => setUninstallOpts((o) => ({ ...o, mcp: v }))}
-              />
-              <ToggleSwitch
-                label="Skills & Agents"
-                description={`Custom skills, commands, and agent configurations${uninstallTargets ? ` (${uninstallTargets.skills.length} found)` : ''}`}
-                checked={uninstallOpts.skills}
-                onChange={(v) => setUninstallOpts((o) => ({ ...o, skills: v }))}
-              />
-
-              <div className="border-t border-border-default pt-3">
-                <p className="text-xs font-medium text-warning mb-2 flex items-center gap-1">
-                  <Database size={14} /> Session & State Data
-                </p>
+            <div className="rounded-xl border border-[var(--color-border-subtle)] divide-y divide-[var(--color-border-subtle)]">
+              <div className="px-4 py-3">
+                <ToggleSwitch
+                  label="OpenCode CLI"
+                  description={`opencode-ai global package (npm/bun)${uninstallTargets ? ` (${uninstallTargets.cli.length > 0 ? 'installed' : 'not found'})` : ''}`}
+                  checked={uninstallOpts.cli}
+                  onChange={(v) => setUninstallOpts((o) => ({ ...o, cli: v }))}
+                  disabled={!uninstallTargets?.cli.length}
+                />
+              </div>
+              <div className="px-4 py-3">
+                <ToggleSwitch
+                  label="Config Directories (ENTIRE)"
+                  description={`~/.config/opencode/, %APPDATA%/opencode/, %LOCALAPPDATA%/opencode/ — removes everything${uninstallTargets ? ` (${uninstallTargets.core.length} dirs)` : ''}`}
+                  checked={uninstallOpts.core}
+                  onChange={(v) => setUninstallOpts((o) => ({ ...o, core: v }))}
+                />
+              </div>
+              <div className="px-4 py-3">
+                <ToggleSwitch
+                  label="Plugins & Dependencies"
+                  description={`node_modules, package.json, lock files${uninstallTargets ? ` (${uninstallTargets.plugins.length} found)` : ''}`}
+                  checked={uninstallOpts.plugins}
+                  onChange={(v) => setUninstallOpts((o) => ({ ...o, plugins: v }))}
+                />
+              </div>
+              <div className="px-4 py-3">
+                <ToggleSwitch
+                  label="MCP Servers"
+                  description={`MCP configuration files and directories${uninstallTargets ? ` (${uninstallTargets.mcp.length} found)` : ''}`}
+                  checked={uninstallOpts.mcp}
+                  onChange={(v) => setUninstallOpts((o) => ({ ...o, mcp: v }))}
+                />
+              </div>
+              <div className="px-4 py-3">
+                <ToggleSwitch
+                  label="Skills & Agents"
+                  description={`Custom skills, commands, and agent configurations${uninstallTargets ? ` (${uninstallTargets.skills.length} found)` : ''}`}
+                  checked={uninstallOpts.skills}
+                  onChange={(v) => setUninstallOpts((o) => ({ ...o, skills: v }))}
+                />
               </div>
 
-              <ToggleSwitch
-                label="Sessions & Database"
-                description={`Session history, SQLite databases, logs, snapshots, auth tokens, locks${uninstallTargets ? ` (${uninstallTargets.sessions.length} locations)` : ''}`}
-                checked={uninstallOpts.sessions}
-                onChange={(v) => setUninstallOpts((o) => ({ ...o, sessions: v }))}
-              />
-              <ToggleSwitch
-                label="Project State (.opencode/.sisyphus)"
-                description={`Remove state directories from all detected projects${uninstallTargets ? ` (${uninstallTargets.projectData.length} found)` : ''}`}
-                checked={uninstallOpts.projectData}
-                onChange={(v) => setUninstallOpts((o) => ({ ...o, projectData: v }))}
-              />
+              <div className="px-4 py-3">
+                <p className="text-xs font-medium text-warning mb-3 flex items-center gap-1">
+                  <Database size={14} /> Session & State Data
+                </p>
+                <div className="space-y-3">
+                  <ToggleSwitch
+                    label="Sessions & Database"
+                    description={`Session history, SQLite databases, logs, snapshots, auth tokens, locks${uninstallTargets ? ` (${uninstallTargets.sessions.length} locations)` : ''}`}
+                    checked={uninstallOpts.sessions}
+                    onChange={(v) => setUninstallOpts((o) => ({ ...o, sessions: v }))}
+                  />
+                  <ToggleSwitch
+                    label="Project State (.opencode/.sisyphus)"
+                    description={`Remove state directories from all detected projects${uninstallTargets ? ` (${uninstallTargets.projectData.length} found)` : ''}`}
+                    checked={uninstallOpts.projectData}
+                    onChange={(v) => setUninstallOpts((o) => ({ ...o, projectData: v }))}
+                  />
+                </div>
+              </div>
             </div>
 
             {uninstallTargets && (
               <details className="text-xs text-themed-muted">
                 <summary className="cursor-pointer hover:text-themed-secondary">Show all files/directories to be removed</summary>
-                <div className="mt-2 max-h-48 overflow-auto rounded-md bg-primary p-2 font-mono space-y-2">
+                <div className="mt-2 max-h-48 overflow-auto rounded-xl bg-primary p-3 border border-[var(--color-border-subtle)] font-mono space-y-2">
                   {uninstallOpts.cli && uninstallTargets.cli.length > 0 && (
                     <div>
                       <div className="text-accent font-semibold">CLI:</div>

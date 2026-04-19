@@ -259,13 +259,13 @@ export default function OpenCodeConfigPage(): JSX.Element {
     }
   }
 
-  if (isLoading) return <div className="flex items-center justify-center py-20 text-themed-muted">Loading config...</div>
+  if (isLoading) return <div className="flex items-center justify-center py-24 text-themed-muted opacity-60">Loading config...</div>
   if (!openCodeConfig) return (
-    <div className="flex flex-col items-center justify-center py-20 gap-4">
-      <p className="text-themed-muted">File config tidak ditemukan</p>
-      <p className="text-xs text-themed-muted max-w-md text-center">
-        Buat file <code className="rounded bg-primary px-1 py-0.5">opencode.json</code> default
-        di <code className="rounded bg-primary px-1 py-0.5">~/.config/opencode/</code> dengan template provider siap pakai.
+    <div className="flex flex-col items-center justify-center py-24 gap-4">
+      <p className="text-themed-muted opacity-60">File config tidak ditemukan</p>
+      <p className="text-xs text-themed-muted opacity-60 max-w-md text-center">
+        Buat file <code className="rounded-md bg-surface/50 px-1.5 py-0.5 font-mono text-accent/80">opencode.json</code> default
+        di <code className="rounded-md bg-surface/50 px-1.5 py-0.5 font-mono text-accent/80">~/.config/opencode/</code> dengan template provider siap pakai.
       </p>
       <div className="flex gap-2">
         <Button onClick={handleCreateConfig}><FilePlus size={16} /> Buat Config Default</Button>
@@ -333,7 +333,7 @@ export default function OpenCodeConfigPage(): JSX.Element {
                       upf(name, 'options', base)
                     }}
                   />
-                  <div className="pt-2 border-t border-border-default">
+                  <div className="pt-2 border-t border-[var(--color-border-subtle)]">
                     <Button variant="danger" onClick={() => removeProvider(name)}><Trash2 size={14} /> Remove Provider</Button>
                   </div>
                 </div>
@@ -380,20 +380,23 @@ export default function OpenCodeConfigPage(): JSX.Element {
 
         {activeTab === 'permissions' && (
           <div className="space-y-2">
-            <p className="text-sm text-themed-secondary mb-4">Control what actions the AI agent is allowed to perform.</p>
-            {PERMISSION_KEYS.map((key) => (
-              <ToggleSwitch
-                key={key}
-                label={key.replace(/_/g, ' ')}
-                description={PERM_DESC[key] || ''}
-                checked={(openCodeConfig.permission?.[key] || 'ask') === 'allow'}
-                onChange={(checked) => {
-                  const perms = { ...(openCodeConfig.permission || {}) }
-                  perms[key] = checked ? 'allow' : 'ask'
-                  uc('permission', perms)
-                }}
-              />
-            ))}
+            <p className="text-[13px] text-themed-muted leading-relaxed mb-6">Control what actions the AI agent is allowed to perform.</p>
+            <div className="rounded-xl border border-[var(--color-border-subtle)] divide-y divide-[var(--color-border-subtle)]">
+              {PERMISSION_KEYS.map((key) => (
+                <div key={key} className="px-4 py-3">
+                  <ToggleSwitch
+                    label={key.replace(/_/g, ' ')}
+                    description={PERM_DESC[key] || ''}
+                    checked={(openCodeConfig.permission?.[key] || 'ask') === 'allow'}
+                    onChange={(checked) => {
+                      const perms = { ...(openCodeConfig.permission || {}) }
+                      perms[key] = checked ? 'allow' : 'ask'
+                      uc('permission', perms)
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

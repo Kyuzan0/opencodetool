@@ -28,29 +28,33 @@ export default function TextInput({
   const inputType = type === 'password' && showPassword ? 'text' : type
 
   return (
-    <div className={`space-y-1 ${className}`}>
-      {label && <label className="block text-sm font-medium text-themed-secondary">{label}</label>}
-      {description && <p className="text-xs text-themed-muted">{description}</p>}
-      <div className="relative">
+    <div className={`space-y-1.5 ${className}`}>
+      {label && (
+        <label className="block text-sm font-medium text-themed-secondary tracking-tight">
+          {label}
+        </label>
+      )}
+      {description && <p className="text-xs text-themed-muted leading-relaxed">{description}</p>}
+      <div className="relative group">
         <input
           type={inputType}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           disabled={disabled}
-          className={`input-field w-full ${type === 'password' ? 'pr-10' : ''} ${error ? 'border-danger' : ''}`}
+          className={`input-field w-full ${type === 'password' ? 'pr-10' : ''} ${error ? 'border-danger focus:border-danger focus:ring-danger/20' : ''}`}
         />
         {type === 'password' && (
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-themed-muted hover:text-themed-secondary"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-themed-muted hover:text-themed-secondary transition-colors"
           >
-            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
           </button>
         )}
       </div>
-      {error && <p className="text-xs text-danger">{error}</p>}
+      {error && <p className="text-xs text-danger font-medium">{error}</p>}
     </div>
   )
 }

@@ -39,15 +39,17 @@ export default function Card({
     <div className={`card ${className}`}>
       {title && (
         <div
-          className={`flex items-center justify-between ${collapsible ? 'cursor-pointer select-none' : ''} ${isCollapsed ? '' : 'mb-3'}`}
+          className={`flex items-center justify-between ${collapsible ? 'cursor-pointer select-none group' : ''} ${isCollapsed ? '' : 'mb-4'}`}
           onClick={handleToggle}
         >
-          <div>
-            <h3 className="text-sm font-semibold text-themed">{title}</h3>
-            {description && <p className="text-xs text-themed-muted">{description}</p>}
+          <div className="space-y-0.5">
+            <h3 className="text-sm font-semibold text-themed tracking-tight">{title}</h3>
+            {description && (
+              <p className="text-xs text-themed-muted leading-relaxed">{description}</p>
+            )}
           </div>
           {collapsible && (
-            <span className="text-themed-muted">
+            <span className="text-themed-muted group-hover:text-themed-secondary transition-colors">
               {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
             </span>
           )}

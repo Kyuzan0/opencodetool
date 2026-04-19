@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useConfigStore, usePluginStore } from '../stores'
 import { Card, TextInput, Button, Modal, ToggleSwitch, SelectInput } from '../components/ui'
-import { Plus, Trash2, Download, Package, AlertCircle } from 'lucide-react'
+import { Plus, Trash2, Download, Package, AlertCircle, CheckCircle } from 'lucide-react'
 import type { PluginInfo } from '@shared/types'
 
 const KNOWN_PLUGINS = [
@@ -228,19 +228,25 @@ export default function PluginsPage(): JSX.Element {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-themed">Plugin Manager</h1>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-themed">Plugin Manager</h1>
+        <p className="text-[13px] text-themed-muted mt-1">Install, configure, and manage OpenCode plugins</p>
+      </div>
 
       <Card title="Installed Plugins">
         {plugins.length === 0 ? (
-          <p className="text-sm text-themed-muted">No plugins installed. Add one below.</p>
+          <div className="flex flex-col items-center justify-center py-6 text-themed-muted">
+            <Package size={40} className="mb-3 opacity-50" />
+            <p className="text-sm">No plugins installed. Add one below.</p>
+          </div>
         ) : (
           <div className="space-y-2">
             {plugins.map((p) => (
-              <div key={p.name} className="flex items-center justify-between rounded-md border border-border-default px-4 py-3">
+              <div key={p.name} className="flex items-center justify-between rounded-lg border border-[var(--color-border-subtle)] px-4 py-3 hover:border-[var(--color-border-bright)] transition-colors">
                 <div className="flex items-center gap-3">
                   <Package size={18} className="text-accent" />
                   <div>
-                    <span className="text-sm font-medium text-themed">{p.name}</span>
+                    <span className="text-[13px] font-medium text-themed">{p.name}</span>
                     {p.version && <span className="ml-2 text-xs text-themed-muted">v{p.version}</span>}
                   </div>
                 </div>
@@ -282,13 +288,15 @@ export default function PluginsPage(): JSX.Element {
           {KNOWN_PLUGINS.map((kp) => {
             const installed = plugins.some((p) => p.name === kp.name)
             return (
-              <div key={kp.name} className="flex items-center justify-between rounded-md border border-border-default px-4 py-3">
+              <div key={kp.name} className="flex items-center justify-between rounded-lg border border-[var(--color-border-subtle)] px-4 py-3 hover:border-[var(--color-border-bright)] transition-colors">
                 <div>
                   <span className="text-sm font-medium text-themed">{kp.name}</span>
                   <p className="text-xs text-themed-muted">{kp.description}</p>
                 </div>
                 {installed ? (
-                  <span className="text-xs text-success">Installed</span>
+                  <span className="text-xs text-success flex items-center gap-1">
+                    <CheckCircle size={14} /> Installed
+                  </span>
                 ) : (
                   <Button variant="secondary" className="text-xs" onClick={() => initiateInstall(kp.command || kp.name)} disabled={isInstalling}>
                     <Plus size={14} /> Install
@@ -302,7 +310,7 @@ export default function PluginsPage(): JSX.Element {
 
       {logLines.length > 0 && (
         <Card title="Install Log">
-          <div className="max-h-96 overflow-auto rounded-md bg-primary p-3 font-mono text-xs text-themed-secondary whitespace-pre-wrap">
+          <div className="max-h-96 overflow-auto rounded-xl bg-primary p-4 border border-[var(--color-border-subtle)] font-mono text-xs text-themed-secondary whitespace-pre-wrap">
             {logLines.map((line, i) => (
               <div key={i} className={line.startsWith('Error') ? 'text-danger' : ''}>{line || '\u00A0'}</div>
             ))}

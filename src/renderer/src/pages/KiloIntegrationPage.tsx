@@ -235,19 +235,22 @@ export default function KiloIntegrationPage(): JSX.Element {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-themed">Kilo + oh-my-openagent</h1>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-themed">Kilo + oh-my-openagent</h1>
+        <p className="text-[13px] text-themed-muted mt-1">Manage oh-my-openagent integration and diagnostics</p>
+      </div>
 
       {/* ── Status Overview ──────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card>
+        <Card className="animate-stagger-in stagger-1">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-accent/10 p-2"><Cpu size={20} className="text-accent" /></div>
+            <div className="rounded-lg bg-accent/[0.08] p-2.5"><Cpu size={20} className="text-accent" /></div>
             <div>
-              <p className="text-xs text-themed-muted">oh-my-openagent</p>
+              <p className="text-[11px] uppercase tracking-wider text-themed-muted">oh-my-openagent</p>
               {openagentVersion ? (
                 <div className="flex items-center gap-1">
                   <CheckCircle size={14} className="text-success" />
-                  <span className="text-sm font-medium text-themed">v{openagentVersion}</span>
+                  <span className="text-xl font-bold tabular-nums text-themed">v{openagentVersion}</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-1">
@@ -258,28 +261,29 @@ export default function KiloIntegrationPage(): JSX.Element {
             </div>
           </div>
         </Card>
-        <Card>
+        <Card className="animate-stagger-in stagger-2">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-accent/10 p-2"><Layers size={20} className="text-accent" /></div>
+            <div className="rounded-lg bg-accent/[0.08] p-2.5"><Layers size={20} className="text-accent" /></div>
             <div>
-              <p className="text-xs text-themed-muted">Agents Configured</p>
-              <span className="text-lg font-bold text-themed">{ohMyConfig?.agents ? Object.keys(ohMyConfig.agents).length : 0}</span>
+              <p className="text-[11px] uppercase tracking-wider text-themed-muted">Agents Configured</p>
+              <span className="text-xl font-bold tabular-nums text-themed">{ohMyConfig?.agents ? Object.keys(ohMyConfig.agents).length : 0}</span>
             </div>
           </div>
         </Card>
-        <Card>
+        <Card className="animate-stagger-in stagger-3">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-accent/10 p-2"><Shield size={20} className="text-accent" /></div>
+            <div className="rounded-lg bg-accent/[0.08] p-2.5"><Shield size={20} className="text-accent" /></div>
             <div>
-              <p className="text-xs text-themed-muted">Categories Configured</p>
-              <span className="text-lg font-bold text-themed">{ohMyConfig?.categories ? Object.keys(ohMyConfig.categories).length : 0}</span>
+              <p className="text-[11px] uppercase tracking-wider text-themed-muted">Categories Configured</p>
+              <span className="text-xl font-bold tabular-nums text-themed">{ohMyConfig?.categories ? Object.keys(ohMyConfig.categories).length : 0}</span>
             </div>
           </div>
         </Card>
       </div>
 
       {/* ── Quick Actions ────────────────────────────────────────── */}
-      <Card title="Quick Actions">
+      <div className="space-y-3">
+        <h2 className="text-sm font-medium text-themed-muted uppercase tracking-wider">Quick Actions</h2>
         <div className="flex flex-wrap gap-2">
           <Button onClick={runDoctor} loading={doctorLoading}>
             <Stethoscope size={16} /> Run Doctor
@@ -291,7 +295,7 @@ export default function KiloIntegrationPage(): JSX.Element {
             <RefreshCw size={16} /> Reload Config
           </Button>
         </div>
-      </Card>
+      </div>
 
       {/* ── Doctor Results ───────────────────────────────────────── */}
       {(doctorResult || doctorError) && (
@@ -304,7 +308,7 @@ export default function KiloIntegrationPage(): JSX.Element {
           ) : doctorResult && (
             <div className="space-y-4">
               {/* Summary bar */}
-              <div className="flex items-center gap-4 rounded-md bg-primary p-3">
+              <div className="flex items-center gap-4 rounded-xl bg-surface/30 p-4">
                 <div className="flex items-center gap-1">
                   <CheckCircle size={14} className="text-success" />
                   <span className="text-xs text-themed-secondary">{doctorResult.summary.passed} passed</span>
@@ -326,15 +330,15 @@ export default function KiloIntegrationPage(): JSX.Element {
 
               {/* System info */}
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex justify-between rounded-md bg-primary px-3 py-2">
+                <div className="flex justify-between rounded-lg bg-surface/30 px-3 py-2.5">
                   <span className="text-themed-muted">OpenCode</span>
                   <span className="text-themed font-medium">{doctorResult.systemInfo.opencodeVersion}</span>
                 </div>
-                <div className="flex justify-between rounded-md bg-primary px-3 py-2">
+                <div className="flex justify-between rounded-lg bg-surface/30 px-3 py-2.5">
                   <span className="text-themed-muted">Bun</span>
                   <span className="text-themed font-medium">{doctorResult.systemInfo.bunVersion}</span>
                 </div>
-                <div className="flex justify-between rounded-md bg-primary px-3 py-2">
+                <div className="flex justify-between rounded-lg bg-surface/30 px-3 py-2.5">
                   <span className="text-themed-muted">GH CLI</span>
                   <span className="text-themed font-medium">
                     {doctorResult.tools.ghCli.installed
@@ -342,7 +346,7 @@ export default function KiloIntegrationPage(): JSX.Element {
                       : 'not installed'}
                   </span>
                 </div>
-                <div className="flex justify-between rounded-md bg-primary px-3 py-2">
+                <div className="flex justify-between rounded-lg bg-surface/30 px-3 py-2.5">
                   <span className="text-themed-muted">MCP Servers</span>
                   <span className="text-themed font-medium">{doctorResult.tools.mcpBuiltin.length} builtin, {doctorResult.tools.mcpUser.length} user</span>
                 </div>
@@ -351,7 +355,7 @@ export default function KiloIntegrationPage(): JSX.Element {
               {/* Check results */}
               <div className="space-y-2">
                 {doctorResult.results.map((check) => (
-                  <div key={check.name} className="rounded-md border border-border-default p-3">
+                  <div key={check.name} className="rounded-lg border border-[var(--color-border-subtle)] p-3 hover:border-[var(--color-border-bright)] transition-colors">
                     <div className="flex items-center gap-2">
                       <StatusIcon status={check.status} />
                       <span className="text-sm font-medium text-themed">{check.name}</span>
@@ -380,9 +384,9 @@ export default function KiloIntegrationPage(): JSX.Element {
         <Card title="Agent Model Assignments">
           <div className="space-y-1">
             {Object.entries(ohMyConfig.agents).map(([name, config]) => (
-              <div key={name} className="rounded-md border border-border-default">
+              <div key={name} className="rounded-lg border border-[var(--color-border-subtle)] hover:border-[var(--color-border-bright)] transition-colors">
                 <button
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-primary/50 transition-colors"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-surface/30 transition-colors"
                   onClick={() => toggleAgent(name)}
                 >
                   {expandedAgents.has(name) ? <ChevronDown size={14} className="text-themed-muted" /> : <ChevronRight size={14} className="text-themed-muted" />}
@@ -391,7 +395,7 @@ export default function KiloIntegrationPage(): JSX.Element {
                   <span className="text-xs text-themed-muted ml-auto">{config.model}{config.variant ? ` (${config.variant})` : ''}</span>
                 </button>
                 {expandedAgents.has(name) && (
-                  <div className="border-t border-border-default px-3 py-2 pl-9 space-y-1">
+                  <div className="border-t border-[var(--color-border-subtle)] px-3 py-2 pl-9 space-y-1">
                     <div className="flex items-center gap-2 text-xs">
                       <span className="text-themed-muted w-16">Primary:</span>
                       <span className="text-themed font-mono">{config.model}</span>
@@ -417,9 +421,9 @@ export default function KiloIntegrationPage(): JSX.Element {
         <Card title="Category Model Assignments">
           <div className="space-y-1">
             {Object.entries(ohMyConfig.categories).map(([name, config]) => (
-              <div key={name} className="rounded-md border border-border-default">
+              <div key={name} className="rounded-lg border border-[var(--color-border-subtle)] hover:border-[var(--color-border-bright)] transition-colors">
                 <button
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-primary/50 transition-colors"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-surface/30 transition-colors"
                   onClick={() => toggleCategory(name)}
                 >
                   {expandedCategories.has(name) ? <ChevronDown size={14} className="text-themed-muted" /> : <ChevronRight size={14} className="text-themed-muted" />}
@@ -428,7 +432,7 @@ export default function KiloIntegrationPage(): JSX.Element {
                   <span className="text-xs text-themed-muted ml-auto">{config.model}{config.variant ? ` (${config.variant})` : ''}</span>
                 </button>
                 {expandedCategories.has(name) && (
-                  <div className="border-t border-border-default px-3 py-2 pl-9 space-y-1">
+                  <div className="border-t border-[var(--color-border-subtle)] px-3 py-2 pl-9 space-y-1">
                     <div className="flex items-center gap-2 text-xs">
                       <span className="text-themed-muted w-16">Primary:</span>
                       <span className="text-themed font-mono">{config.model}</span>
@@ -469,7 +473,7 @@ export default function KiloIntegrationPage(): JSX.Element {
         }
       >
         {installLog.length > 0 ? (
-          <div className="max-h-64 overflow-auto rounded-md bg-primary p-3 font-mono text-xs text-themed-secondary whitespace-pre-wrap">
+          <div className="max-h-64 overflow-auto rounded-xl bg-primary p-4 border border-[var(--color-border-subtle)] font-mono text-xs text-themed-secondary whitespace-pre-wrap">
             {installLog.map((line, i) => (
               <div key={i} className={line.startsWith('Error') ? 'text-danger' : line.includes('complete') ? 'text-success font-medium' : ''}>{line || '\u00A0'}</div>
             ))}

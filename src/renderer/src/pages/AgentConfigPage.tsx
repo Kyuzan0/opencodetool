@@ -220,13 +220,13 @@ export default function AgentConfigPage(): JSX.Element {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-themed">Agent Config</h1>
-          {agentConfigPath && <p className="truncate text-xs text-themed-muted mt-1" title={agentConfigPath.path}>{agentConfigPath.path}</p>}
-          {!agentConfigPath && <p className="text-xs text-themed-muted mt-1">No config file found — editing in memory</p>}
+          <h1 className="text-2xl font-semibold tracking-tight text-themed">Agent Config</h1>
+          {agentConfigPath && <p className="truncate font-mono text-[11px] text-themed-muted mt-1" title={agentConfigPath.path}>{agentConfigPath.path}</p>}
+          {!agentConfigPath && <p className="text-[11px] text-themed-muted mt-1">No config file found — editing in memory</p>}
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 shrink-0">
           <Button variant="secondary" onClick={handleOpenExternal} disabled={!agentConfigPath?.path}><ExternalLink size={16} /> Open in Editor</Button>
           <Button variant="secondary" onClick={handleImport}><Upload size={16} /> Import</Button>
           <Button variant="secondary" onClick={handleExport}><Download size={16} /> Export</Button>
