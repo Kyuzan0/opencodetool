@@ -51,7 +51,7 @@ export default function DashboardPage(): JSX.Element {
     }
   }
 
-  async function handleRuntimeAction(mode: 'cli' | 'web', action: 'start' | 'stop' | 'restart'): Promise<void> {
+  async function handleRuntimeAction(mode: 'cli' | 'web', action: 'start' | 'stop' | 'restart', force?: boolean): Promise<void> {
     const busyKey = `${mode}:${action}`
     setRuntimeBusy(busyKey)
     try {
@@ -60,11 +60,16 @@ export default function DashboardPage(): JSX.Element {
 
       let result: { running: boolean; port?: number | null }
       if (action === 'stop') {
-        result = await opencodeApi.stop(mode)
+        // Pass port so the service can kill processes occupying it (including external/orphan processes)
+        // Prefer the running port from status, fallback to the configured port
+        const stopPort = mode === 'web'
+          ? (runtimeStatus?.web.port ?? (Number(openCodeWebPort) || undefined))
+          : undefined
+        result = await opencodeApi.stop(mode, stopPort)
       } else if (mode === 'web') {
         const port = parseWebPort()
         result = action === 'start'
-          ? await opencodeApi.start(mode, port)
+          ? await opencodeApi.start(mode, port, force)
           : await opencodeApi.restart(mode, port)
       } else {
         result = action === 'start'
@@ -77,7 +82,21 @@ export default function DashboardPage(): JSX.Element {
       const portSuffix = result.port ? ` (port ${result.port})` : ''
       appendRuntimeLog(`${modeLabel} ${action} -> ${result.running ? 'running' : 'stopped'}${portSuffix}`)
     } catch (e: any) {
-      appendRuntimeLog(`Error ${mode} ${action}: ${e.message || 'unknown error'}`)
+      const errorMsg: string = e.message || 'unknown error'
+
+      // Handle PORT_IN_USE: auto-retry with force to kill the occupying process
+      if (errorMsg.startsWith('PORT_IN_USE:') && !force) {
+        const busyPort = errorMsg.split(':')[1]
+        appendRuntimeLog(`Port ${busyPort} sedang digunakan, menghentikan proses lama...`)
+        try {
+          await handleRuntimeAction(mode, action, true)
+          return
+        } catch {
+          // force retry also failed, fall through to log error
+        }
+      }
+
+      appendRuntimeLog(`Error ${mode} ${action}: ${errorMsg}`)
     } finally {
       setRuntimeBusy(null)
     }

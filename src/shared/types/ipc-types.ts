@@ -88,7 +88,7 @@ export interface IpcChannels {
 
   // OpenCode Runtime Control
   'opencode:status': { args: []; result: OpenCodeRuntimeOverview }
-  'opencode:start': { args: ['cli' | 'web', number?]; result: OpenCodeRuntimeStatus }
-  'opencode:stop': { args: ['cli' | 'web']; result: OpenCodeRuntimeStatus }
+  'opencode:start': { args: ['cli' | 'web', number?, boolean?]; result: OpenCodeRuntimeStatus }
+  'opencode:stop': { args: ['cli' | 'web', number?]; result: OpenCodeRuntimeStatus }
   'opencode:restart': { args: ['cli' | 'web', number?]; result: OpenCodeRuntimeStatus }
 }

@@ -101,16 +101,27 @@ export default function PluginsPage(): JSX.Element {
     }
   }, [openCodeConfig?.plugin])
 
-  function updatePluginList(newList: string[]): void {
-    if (!openCodeConfig) return
-    const updated = { ...openCodeConfig, plugin: newList }
-    setOpenCodeConfig(updated)
-    setDirty(false)
-    // Auto-save to disk so changes persist across reloads
-    if (configPath?.path) {
-      window.api.config.write(configPath.path, updated as any, {
+  async function updatePluginList(newList: string[]): Promise<void> {
+    if (!configPath?.path) return
+    try {
+      // Re-read the latest config from disk to avoid overwriting external changes
+      const freshResult = await window.api.config.read(configPath.path)
+      const freshConfig = freshResult.data as Record<string, unknown>
+      // Only update the plugin array, preserve everything else from disk
+      freshConfig.plugin = newList
+      setOpenCodeConfig(freshConfig as any)
+      setDirty(false)
+      await window.api.config.write(configPath.path, freshConfig, {
         format: configPath.format || 'json'
-      }).catch(() => { setDirty(true) })
+      })
+    } catch (e: any) {
+      // Fallback: update in-memory config if disk read fails
+      if (openCodeConfig) {
+        const updated = { ...openCodeConfig, plugin: newList }
+        setOpenCodeConfig(updated)
+        setDirty(true)
+      }
+      setError(`Gagal menyimpan plugin list: ${e.message || 'unknown error'}`)
     }
   }
 
@@ -155,9 +166,10 @@ export default function PluginsPage(): JSX.Element {
         const pluginName = extractPluginName(name)
         const newPlugin: PluginInfo = { name: pluginName, version: '', enabled: true, installed: true }
         addPlugin(newPlugin)
-        const currentPlugins = openCodeConfig?.plugin || []
+        // Use fresh state from store to avoid stale closure issues
+        const currentPlugins = useConfigStore.getState().openCodeConfig?.plugin || []
         if (!currentPlugins.includes(pluginName)) {
-          updatePluginList([...currentPlugins, pluginName])
+          await updatePluginList([...currentPlugins, pluginName])
         }
         setInstallName('')
       } else {
@@ -184,8 +196,9 @@ export default function PluginsPage(): JSX.Element {
       // Remove from config regardless of npm/bun result
       // (package may not exist in node_modules but should still be removed from plugin list)
       removeFromStore(name)
-      const currentPlugins = openCodeConfig?.plugin || []
-      updatePluginList(currentPlugins.filter((p) => p !== name))
+      // Use fresh state from store to avoid stale closure issues
+      const currentPlugins = useConfigStore.getState().openCodeConfig?.plugin || []
+      await updatePluginList(currentPlugins.filter((p) => p !== name))
 
       if (result.exitCode === 0) {
         setLogLines((prev) => [...prev, `Uninstalled ${name}`, ''])
@@ -197,18 +210,19 @@ export default function PluginsPage(): JSX.Element {
     } catch (e: any) {
       // Even on error, remove from config list so it doesn't persist
       removeFromStore(name)
-      const currentPlugins = openCodeConfig?.plugin || []
-      updatePluginList(currentPlugins.filter((p) => p !== name))
+      const currentPlugins = useConfigStore.getState().openCodeConfig?.plugin || []
+      await updatePluginList(currentPlugins.filter((p) => p !== name))
       setLogLines((prev) => [...prev, `Removed ${name} from config (package manager error: ${e.message || 'unknown'})`, ''])
     } finally { setInstalling(false) }
   }
 
-  function togglePlugin(name: string, enabled: boolean): void {
-    const currentPlugins = openCodeConfig?.plugin || []
+  async function togglePlugin(name: string, enabled: boolean): Promise<void> {
+    // Use fresh state from store to avoid stale closure issues
+    const currentPlugins = useConfigStore.getState().openCodeConfig?.plugin || []
     if (enabled && !currentPlugins.includes(name)) {
-      updatePluginList([...currentPlugins, name])
+      await updatePluginList([...currentPlugins, name])
     } else if (!enabled) {
-      updatePluginList(currentPlugins.filter((p) => p !== name))
+      await updatePluginList(currentPlugins.filter((p) => p !== name))
     }
   }
 

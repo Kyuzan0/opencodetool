@@ -68,8 +68,8 @@ const api = {
   },
   opencode: {
     status: () => ipcRenderer.invoke('opencode:status'),
-    start: (mode: 'cli' | 'web', port?: number) => ipcRenderer.invoke('opencode:start', mode, port),
-    stop: (mode: 'cli' | 'web') => ipcRenderer.invoke('opencode:stop', mode),
+    start: (mode: 'cli' | 'web', port?: number, force?: boolean) => ipcRenderer.invoke('opencode:start', mode, port, force),
+    stop: (mode: 'cli' | 'web', port?: number) => ipcRenderer.invoke('opencode:stop', mode, port),
     restart: (mode: 'cli' | 'web', port?: number) => ipcRenderer.invoke('opencode:restart', mode, port)
   },
   dialog: {

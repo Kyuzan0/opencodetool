@@ -12,12 +12,12 @@ export function registerOpenCodeControlIpc(): void {
     return getOpenCodeRuntimeOverview()
   })
 
-  ipcMain.handle('opencode:start', async (_event, mode: OpenCodeRuntimeMode, port?: number) => {
-    return startOpenCode(mode, port)
+  ipcMain.handle('opencode:start', async (_event, mode: OpenCodeRuntimeMode, port?: number, force?: boolean) => {
+    return startOpenCode(mode, port, force)
   })
 
-  ipcMain.handle('opencode:stop', async (_event, mode: OpenCodeRuntimeMode) => {
-    return stopOpenCode(mode)
+  ipcMain.handle('opencode:stop', async (_event, mode: OpenCodeRuntimeMode, port?: number) => {
+    return stopOpenCode(mode, port)
   })
 
   ipcMain.handle('opencode:restart', async (_event, mode: OpenCodeRuntimeMode, port?: number) => {
