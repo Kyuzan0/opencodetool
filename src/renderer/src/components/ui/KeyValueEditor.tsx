@@ -31,7 +31,7 @@ export default function KeyValueEditor({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      {label && <label className="block text-sm font-medium text-gray-300">{label}</label>}
+      {label && <label className="block text-sm font-medium text-themed-secondary">{label}</label>}
       {pairs.map((pair, i) => (
         <div key={i} className="flex items-center gap-2">
           <input
@@ -47,7 +47,7 @@ export default function KeyValueEditor({
             onChange={(e) => updateRow(i, 'value', e.target.value)}
             placeholder={valuePlaceholder}
           />
-          <button onClick={() => removeRow(i)} className="p-1 text-gray-500 hover:text-danger">
+          <button onClick={() => removeRow(i)} className="p-1 text-themed-muted hover:text-danger">
             <Trash2 size={16} />
           </button>
         </div>

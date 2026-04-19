@@ -33,7 +33,7 @@ export default function Toast({ toast, onDismiss }: ToastProps): JSX.Element {
   }, [toast.id, duration, onDismiss])
 
   return (
-    <div className={`flex items-center gap-3 rounded-md border px-4 py-3 shadow-lg ${colors[toast.type]}`}>
+    <div className={`flex items-center gap-3 rounded-md border px-4 py-3 shadow-lg animate-slide-in-right ${colors[toast.type]}`}>
       <Icon size={18} />
       <span className="flex-1 text-sm">{toast.message}</span>
       <button onClick={() => onDismiss(toast.id)} className="opacity-60 hover:opacity-100">
@@ -45,7 +45,7 @@ export default function Toast({ toast, onDismiss }: ToastProps): JSX.Element {
 
 export function ToastContainer({ toasts, onDismiss }: { toasts: ToastType[]; onDismiss: (id: string) => void }): JSX.Element {
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
       {toasts.map((t) => (
         <Toast key={t.id} toast={t} onDismiss={onDismiss} />
       ))}

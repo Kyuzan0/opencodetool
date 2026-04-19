@@ -19,7 +19,7 @@ export default function SettingsPage(): JSX.Element {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-100">Settings</h1>
+      <h1 className="text-2xl font-bold text-themed">Settings</h1>
 
       <Card title="Appearance">
         <div className="space-y-4">
@@ -27,14 +27,14 @@ export default function SettingsPage(): JSX.Element {
             <div className="flex items-center gap-3">
               {theme === 'dark' ? <Moon size={20} className="text-accent" /> : <Sun size={20} className="text-warning" />}
               <div>
-                <span className="text-sm font-medium text-gray-200">Theme</span>
-                <p className="text-xs text-gray-500">Switch between dark and light mode</p>
+                <span className="text-sm font-medium text-themed">Theme</span>
+                <p className="text-xs text-themed-muted">Switch between dark and light mode</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`text-xs ${theme === 'dark' ? 'text-accent' : 'text-gray-500'}`}>Dark</span>
+              <span className={`text-xs ${theme === 'dark' ? 'text-accent' : 'text-themed-muted'}`}>Dark</span>
               <ToggleSwitch checked={theme === 'light'} onChange={(c) => setTheme(c ? 'light' : 'dark')} />
-              <span className={`text-xs ${theme === 'light' ? 'text-accent' : 'text-gray-500'}`}>Light</span>
+              <span className={`text-xs ${theme === 'light' ? 'text-accent' : 'text-themed-muted'}`}>Light</span>
             </div>
           </div>
           <SelectInput label="Language" options={[{ value: 'en', label: 'English' }, { value: 'id', label: 'Indonesian' }]} value={language} onChange={setLanguage} />
@@ -69,12 +69,12 @@ export default function SettingsPage(): JSX.Element {
       <Card title="About">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-400">App Version</span>
-            <span className="text-sm text-gray-200">1.0.0</span>
+            <span className="text-sm text-themed-secondary">App Version</span>
+            <span className="text-sm text-themed">1.0.0</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-400">Electron</span>
-            <span className="text-sm text-gray-200">{window.electron?.process?.versions?.electron || 'N/A'}</span>
+            <span className="text-sm text-themed-secondary">Electron</span>
+            <span className="text-sm text-themed">{window.electron?.process?.versions?.electron || 'N/A'}</span>
           </div>
           <div className="space-y-2 pt-2 border-t border-border-default">
             <a href="https://opencode.ai" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-accent hover:text-accent-hover"><ExternalLink size={14} /> OpenCode Documentation</a>

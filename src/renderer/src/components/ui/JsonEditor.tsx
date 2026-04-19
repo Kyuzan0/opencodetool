@@ -31,8 +31,8 @@ export default function JsonEditor({
     <div className={`space-y-1 ${className}`}>
       {label && (
         <div className="flex items-center justify-between">
-          <label className="block text-sm font-medium text-gray-300">{label}</label>
-          <button onClick={copyToClipboard} className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300">
+          <label className="block text-sm font-medium text-themed-secondary">{label}</label>
+          <button onClick={copyToClipboard} className="inline-flex items-center gap-1 text-xs text-themed-muted hover:text-themed-secondary">
             {copied ? <Check size={14} /> : <Copy size={14} />}
             {copied ? 'Copied' : 'Copy'}
           </button>
@@ -40,7 +40,7 @@ export default function JsonEditor({
       )}
       <div className="relative overflow-hidden rounded-md border border-border-default bg-primary">
         <div className="flex max-h-96 overflow-auto">
-          <div className="select-none border-r border-border-default bg-secondary/30 px-3 py-3 text-right font-mono text-xs leading-5 text-gray-600">
+          <div className="select-none border-r border-border-default bg-secondary/30 px-3 py-3 text-right font-mono text-xs leading-5 text-themed-muted">
             {lines.map((_, i) => (
               <div key={i}>{i + 1}</div>
             ))}
@@ -50,7 +50,7 @@ export default function JsonEditor({
             onChange={(e) => onChange?.(e.target.value)}
             readOnly={readOnly}
             spellCheck={false}
-            className="flex-1 resize-none bg-transparent p-3 font-mono text-xs leading-5 text-gray-200 outline-none"
+            className="flex-1 resize-none bg-transparent p-3 font-mono text-xs leading-5 text-themed outline-none"
             rows={Math.max(lines.length, 5)}
           />
         </div>

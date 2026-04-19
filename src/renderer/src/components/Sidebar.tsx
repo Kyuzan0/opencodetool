@@ -66,8 +66,8 @@ export default function Sidebar(): JSX.Element {
       </nav>
 
       {!sidebarCollapsed && (
-        <div className="border-t border-border-default p-3">
-          <p className="truncate text-xs text-gray-500">v1.0.0</p>
+        <div className="border-t border-themed p-3">
+          <p className="truncate text-xs text-themed-muted">v1.0.0</p>
         </div>
       )}
     </aside>

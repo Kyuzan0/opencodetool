@@ -10,6 +10,8 @@ import SettingsPage from './pages/SettingsPage'
 import { useSettingsStore, useUiStore } from './stores'
 import { applyTheme } from './lib/theme'
 import { ToastContainer } from './components/ui/Toast'
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
+import { useUnsavedWarning } from './hooks/useUnsavedWarning'
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null }
@@ -20,7 +22,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
         <div className="flex h-screen items-center justify-center bg-primary p-8">
           <div className="max-w-lg rounded-lg border border-danger/30 bg-danger/5 p-6">
             <h2 className="text-lg font-bold text-danger">Something went wrong</h2>
-            <p className="mt-2 text-sm text-gray-400">{this.state.error.message}</p>
+            <p className="mt-2 text-sm text-themed-secondary">{this.state.error.message}</p>
             <button onClick={() => this.setState({ error: null })} className="mt-4 rounded bg-accent px-4 py-2 text-sm text-white hover:bg-accent-hover">
               Try Again
             </button>
@@ -37,6 +39,26 @@ function ToastLayer(): JSX.Element {
   return <ToastContainer toasts={toasts} onDismiss={removeToast} />
 }
 
+function AppShell(): JSX.Element {
+  useKeyboardShortcuts()
+  useUnsavedWarning()
+  return (
+    <>
+      <Routes>
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/opencode-config" element={<OpenCodeConfigPage />} />
+          <Route path="/agent-config" element={<AgentConfigPage />} />
+          <Route path="/plugins" element={<PluginsPage />} />
+          <Route path="/skills" element={<SkillsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Route>
+      </Routes>
+      <ToastLayer />
+    </>
+  )
+}
+
 function App(): JSX.Element {
   const theme = useSettingsStore((s) => s.theme)
 
@@ -47,17 +69,7 @@ function App(): JSX.Element {
   return (
     <ErrorBoundary>
       <HashRouter>
-        <Routes>
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/opencode-config" element={<OpenCodeConfigPage />} />
-            <Route path="/agent-config" element={<AgentConfigPage />} />
-            <Route path="/plugins" element={<PluginsPage />} />
-            <Route path="/skills" element={<SkillsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-          </Route>
-        </Routes>
-        <ToastLayer />
+        <AppShell />
       </HashRouter>
     </ErrorBoundary>
   )

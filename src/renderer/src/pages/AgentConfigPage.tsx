@@ -132,19 +132,19 @@ export default function AgentConfigPage(): JSX.Element {
     uc('mcps', mcps)
   }
 
-  if (isLoading) return <div className="flex items-center justify-center py-20 text-gray-500">Loading config...</div>
+  if (isLoading) return <div className="flex items-center justify-center py-20 text-themed-muted">Loading config...</div>
 
   const config = agentConfig || { agents: {}, categories: {} }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-100">Agent Config</h1>
-          {agentConfigPath && <p className="text-xs text-gray-500 mt-1" title={agentConfigPath.path}>{agentConfigPath.path}</p>}
-          {!agentConfigPath && <p className="text-xs text-gray-500 mt-1">No config file found — editing in memory</p>}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold text-themed">Agent Config</h1>
+          {agentConfigPath && <p className="truncate text-xs text-themed-muted mt-1" title={agentConfigPath.path}>{agentConfigPath.path}</p>}
+          {!agentConfigPath && <p className="text-xs text-themed-muted mt-1">No config file found — editing in memory</p>}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="secondary" onClick={handleImport}><Upload size={16} /> Import</Button>
           <Button variant="secondary" onClick={handleExport}><Download size={16} /> Export</Button>
           <Button variant="secondary" onClick={handleReload}><RefreshCw size={16} /> Reload</Button>
@@ -157,12 +157,12 @@ export default function AgentConfigPage(): JSX.Element {
       <div className="mt-4">
         {activeTab === 'agents' && (
           <div className="space-y-3">
-            <p className="text-sm text-gray-400 mb-2">Override settings for built-in agents. Only agents with overrides are shown.</p>
+            <p className="text-sm text-themed-secondary mb-2">Override settings for built-in agents. Only agents with overrides are shown.</p>
             {BUILTIN_AGENTS.map((name) => {
               const override = config.agents?.[name]
               if (!override) return (
                 <div key={name} className="flex items-center justify-between rounded-md border border-border-default px-4 py-2">
-                  <span className="text-sm text-gray-400">{name}</span>
+                  <span className="text-sm text-themed-secondary">{name}</span>
                   <Button variant="secondary" className="text-xs" onClick={() => updateAgent(name, {})}><Plus size={14} /> Add Override</Button>
                 </div>
               )
@@ -186,7 +186,7 @@ export default function AgentConfigPage(): JSX.Element {
 
         {activeTab === 'categories' && (
           <div className="space-y-3">
-            <p className="text-sm text-gray-400 mb-2">Configure model and settings for each task category.</p>
+            <p className="text-sm text-themed-secondary mb-2">Configure model and settings for each task category.</p>
             {CATEGORIES.map((name) => {
               const cat = config.categories?.[name] || {}
               return (
@@ -233,8 +233,8 @@ export default function AgentConfigPage(): JSX.Element {
 
         {activeTab === 'hooks' && (
           <div className="space-y-2">
-            <p className="text-sm text-gray-400 mb-4">Enable or disable lifecycle hooks.</p>
-            {Object.entries(config.hooks || {}).length === 0 && <p className="text-sm text-gray-500">No hooks configured. Hooks are defined in the config file.</p>}
+            <p className="text-sm text-themed-secondary mb-4">Enable or disable lifecycle hooks.</p>
+            {Object.entries(config.hooks || {}).length === 0 && <p className="text-sm text-themed-muted">No hooks configured. Hooks are defined in the config file.</p>}
             {Object.entries(config.hooks || {}).map(([name, hook]) => (
               <ToggleSwitch
                 key={name}
@@ -251,7 +251,7 @@ export default function AgentConfigPage(): JSX.Element {
 
         {activeTab === 'mcps' && (
           <div className="space-y-3">
-            <p className="text-sm text-gray-400 mb-2">Configure MCP (Model Context Protocol) servers.</p>
+            <p className="text-sm text-themed-secondary mb-2">Configure MCP (Model Context Protocol) servers.</p>
             {Object.entries(config.mcps || {}).map(([name, mcp]) => (
               <Card key={name} title={name} description={mcp.command || ''} collapsible defaultCollapsed>
                 <div className="space-y-3 pt-2">
@@ -282,8 +282,8 @@ export default function AgentConfigPage(): JSX.Element {
 
         {activeTab === 'experimental' && (
           <div className="space-y-2">
-            <p className="text-sm text-gray-400 mb-4">Toggle experimental features.</p>
-            {Object.entries(config.experimental || {}).length === 0 && <p className="text-sm text-gray-500">No experimental flags configured.</p>}
+            <p className="text-sm text-themed-secondary mb-4">Toggle experimental features.</p>
+            {Object.entries(config.experimental || {}).length === 0 && <p className="text-sm text-themed-muted">No experimental flags configured.</p>}
             {Object.entries(config.experimental || {}).map(([key, val]) => (
               <ToggleSwitch
                 key={key}

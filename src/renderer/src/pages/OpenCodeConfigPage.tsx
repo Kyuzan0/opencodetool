@@ -188,22 +188,22 @@ export default function OpenCodeConfigPage(): JSX.Element {
     upf(selProv, 'models', { ...p.models, [mk]: { ...m, [field]: val } })
   }
 
-  if (isLoading) return <div className="flex items-center justify-center py-20 text-gray-500">Loading config...</div>
+  if (isLoading) return <div className="flex items-center justify-center py-20 text-themed-muted">Loading config...</div>
   if (!openCodeConfig) return (
     <div className="flex flex-col items-center justify-center py-20 gap-4">
-      <p className="text-gray-500">No config loaded</p>
+      <p className="text-themed-muted">No config loaded</p>
       <Button onClick={loadConfig}>Load Config</Button>
     </div>
   )
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-100">OpenCode Config</h1>
-          {configPath && <p className="text-xs text-gray-500 mt-1" title={configPath.path}>{configPath.path}</p>}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold text-themed">OpenCode Config</h1>
+          {configPath && <p className="truncate text-xs text-themed-muted mt-1" title={configPath.path}>{configPath.path}</p>}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="secondary" onClick={handleImport}><Upload size={16} /> Import</Button>
           <Button variant="secondary" onClick={handleExport}><Download size={16} /> Export</Button>
           <Button variant="secondary" onClick={handleReload}><RefreshCw size={16} /> Reload</Button>
@@ -282,13 +282,13 @@ export default function OpenCodeConfigPage(): JSX.Element {
                 </Modal>
               </div>
             )}
-            {selProv && !openCodeConfig.provider?.[selProv]?.models && <p className="text-gray-500 text-sm">No models configured for this provider.</p>}
+            {selProv && !openCodeConfig.provider?.[selProv]?.models && <p className="text-themed-muted text-sm">No models configured for this provider.</p>}
           </div>
         )}
 
         {activeTab === 'permissions' && (
           <div className="space-y-2">
-            <p className="text-sm text-gray-400 mb-4">Control what actions the AI agent is allowed to perform.</p>
+            <p className="text-sm text-themed-secondary mb-4">Control what actions the AI agent is allowed to perform.</p>
             {PERMISSION_KEYS.map((key) => (
               <ToggleSwitch
                 key={key}

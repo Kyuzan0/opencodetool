@@ -27,10 +27,10 @@ export default function ArrayEditor({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      {label && <label className="block text-sm font-medium text-gray-300">{label}</label>}
+      {label && <label className="block text-sm font-medium text-themed-secondary">{label}</label>}
       {items.map((item, i) => (
         <div key={i} className="flex items-center gap-2">
-          <span className="cursor-grab text-gray-600">
+          <span className="cursor-grab text-themed-muted">
             <GripVertical size={14} />
           </span>
           <input
@@ -40,16 +40,16 @@ export default function ArrayEditor({
             placeholder={placeholder}
           />
           {i > 0 && (
-            <button onClick={() => moveItem(i, i - 1)} className="p-1 text-gray-500 hover:text-gray-300 text-xs">
+            <button onClick={() => moveItem(i, i - 1)} className="p-1 text-themed-muted hover:text-themed-secondary text-xs">
               ↑
             </button>
           )}
           {i < items.length - 1 && (
-            <button onClick={() => moveItem(i, i + 1)} className="p-1 text-gray-500 hover:text-gray-300 text-xs">
+            <button onClick={() => moveItem(i, i + 1)} className="p-1 text-themed-muted hover:text-themed-secondary text-xs">
               ↓
             </button>
           )}
-          <button onClick={() => removeItem(i)} className="p-1 text-gray-500 hover:text-danger">
+          <button onClick={() => removeItem(i)} className="p-1 text-themed-muted hover:text-danger">
             <Trash2 size={16} />
           </button>
         </div>

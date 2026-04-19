@@ -45,18 +45,18 @@ export default function DashboardPage(): JSX.Element {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-100">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-themed">Dashboard</h1>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-accent/10 p-2"><FileJson size={20} className="text-accent" /></div>
             <div>
-              <p className="text-xs text-gray-500">Config Status</p>
+              <p className="text-xs text-themed-muted">Config Status</p>
               <div className="flex items-center gap-1">
-                {configPath?.exists ? <CheckCircle size={14} className="text-success" /> : <XCircle size={14} className="text-gray-500" />}
-                <span className="text-sm font-medium text-gray-200">{configPath?.exists ? 'Loaded' : 'Not loaded'}</span>
+                {configPath?.exists ? <CheckCircle size={14} className="text-success" /> : <XCircle size={14} className="text-themed-muted" />}
+                <span className="text-sm font-medium text-themed">{configPath?.exists ? 'Loaded' : 'Not loaded'}</span>
               </div>
-              {configPath && <p className="mt-1 truncate text-xs text-gray-500" title={configPath.path}>{configPath.path}</p>}
+              {configPath && <p className="mt-1 truncate text-xs text-themed-muted" title={configPath.path}>{configPath.path}</p>}
             </div>
           </div>
         </Card>
@@ -64,9 +64,9 @@ export default function DashboardPage(): JSX.Element {
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-accent/10 p-2"><Puzzle size={20} className="text-accent" /></div>
             <div>
-              <p className="text-xs text-gray-500">Active Plugins</p>
-              <span className="text-lg font-bold text-gray-200">{plugins.length}</span>
-              {plugins.slice(0, 3).map((p) => <p key={p.name} className="truncate text-xs text-gray-500">{p.name}</p>)}
+              <p className="text-xs text-themed-muted">Active Plugins</p>
+              <span className="text-lg font-bold text-themed">{plugins.length}</span>
+              {plugins.slice(0, 3).map((p) => <p key={p.name} className="truncate text-xs text-themed-muted">{p.name}</p>)}
             </div>
           </div>
         </Card>
@@ -74,8 +74,8 @@ export default function DashboardPage(): JSX.Element {
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-accent/10 p-2"><Wand2 size={20} className="text-accent" /></div>
             <div>
-              <p className="text-xs text-gray-500">Registered Skills</p>
-              <span className="text-lg font-bold text-gray-200">{skills.length}</span>
+              <p className="text-xs text-themed-muted">Registered Skills</p>
+              <span className="text-lg font-bold text-themed">{skills.length}</span>
             </div>
           </div>
         </Card>
@@ -83,8 +83,8 @@ export default function DashboardPage(): JSX.Element {
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-accent/10 p-2"><Package size={20} className="text-accent" /></div>
             <div>
-              <p className="text-xs text-gray-500">Package Manager</p>
-              <span className="text-sm font-medium text-gray-200">{pmInfo ? `${pmInfo.preferred} v${pmInfo.version}` : 'Detecting...'}</span>
+              <p className="text-xs text-themed-muted">Package Manager</p>
+              <span className="text-sm font-medium text-themed">{pmInfo ? `${pmInfo.preferred} v${pmInfo.version}` : 'Detecting...'}</span>
             </div>
           </div>
         </Card>
@@ -105,7 +105,7 @@ export default function DashboardPage(): JSX.Element {
           <div className="space-y-2">
             {recentProjects.map((path) => (
               <div key={path} className="flex items-center justify-between rounded-md border border-border-default p-2">
-                <div className="flex items-center gap-2 truncate"><FolderOpen size={16} className="text-gray-500" /><span className="truncate text-sm text-gray-300">{path}</span></div>
+                <div className="flex items-center gap-2 truncate"><FolderOpen size={16} className="text-themed-muted" /><span className="truncate text-sm text-themed-secondary">{path}</span></div>
                 <Button variant="secondary" className="text-xs">Open</Button>
               </div>
             ))}

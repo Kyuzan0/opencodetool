@@ -116,17 +116,22 @@
   .card {
     background-color: var(--color-bg-card);
     border: 1px solid var(--color-border);
-    @apply rounded-lg p-4;
+    @apply rounded-lg p-4 transition-all duration-150;
+  }
+
+  .card:hover {
+    border-color: color-mix(in srgb, var(--color-border) 70%, var(--color-text-primary) 30%);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   }
 
   .btn-primary {
-    @apply rounded-md bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent/50;
+    @apply rounded-md bg-accent px-4 py-2 text-sm font-medium text-white transition-all duration-150 hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent/50;
   }
 
   .btn-secondary {
     border: 1px solid var(--color-border);
     color: var(--color-text-primary);
-    @apply rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-accent/50;
+    @apply rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-all duration-150 hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-accent/50;
   }
 
   .dark .btn-secondary {
@@ -137,7 +142,11 @@
     background-color: var(--color-input-bg);
     border: 1px solid var(--color-border);
     color: var(--color-text-primary);
-    @apply rounded-md px-3 py-2 text-sm placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent;
+    @apply rounded-md px-3 py-2 text-sm transition-colors duration-150 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent;
+  }
+
+  .input-field::placeholder {
+    color: var(--color-text-muted);
   }
 
   .text-themed {
@@ -152,6 +161,14 @@
     color: var(--color-text-muted);
   }
 
+  .hover\:text-themed:hover {
+    color: var(--color-text-primary);
+  }
+
+  .hover\:text-themed-secondary:hover {
+    color: var(--color-text-secondary);
+  }
+
   .bg-themed {
     background-color: var(--color-bg-primary);
   }
@@ -164,7 +181,43 @@
     background-color: var(--color-bg-sidebar);
   }
 
+  .bg-themed-card {
+    background-color: var(--color-bg-card);
+  }
+
   .border-themed {
     border-color: var(--color-border);
+  }
+
+  .toggle-track {
+    background-color: var(--color-text-muted);
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(16px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.15s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.2s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.2s ease-out;
   }
 }

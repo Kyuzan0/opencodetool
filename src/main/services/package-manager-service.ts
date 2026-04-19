@@ -61,7 +61,31 @@ export async function getPreferredPackageManager(): Promise<'bun' | 'npm'> {
   return bun ? 'bun' : 'npm'
 }
 
+function parseBunxNpxCommand(input: string): { runner: 'bunx' | 'npx'; args: string[] } | null {
+  const trimmed = input.trim()
+  const parts = trimmed.split(/\s+/)
+  if (parts.length < 2) return null
+  const runner = parts[0].toLowerCase()
+  if (runner === 'bunx' || runner === 'npx') {
+    return { runner: runner as 'bunx' | 'npx', args: parts.slice(1) }
+  }
+  return null
+}
+
 export async function installPlugin(pluginName: string, configDir: string): Promise<{ stdout: string; stderr: string; exitCode: number }> {
+  const parsed = parseBunxNpxCommand(pluginName)
+  if (parsed) {
+    if (parsed.runner === 'bunx') {
+      const bun = await detectBun()
+      if (bun) {
+        return runCommand(bun.path, ['x', ...parsed.args], configDir, 60000)
+      }
+      return { stdout: '', stderr: 'bunx requested but bun is not installed', exitCode: 1 }
+    }
+    // npx
+    return runCommand('npx', parsed.args, configDir, 60000)
+  }
+
   const bun = await detectBun()
   if (bun) {
     return runCommand(bun.path, ['add', pluginName], configDir, 30000)

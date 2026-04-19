@@ -91,8 +91,8 @@ export default function TerminalPanel(): JSX.Element | null {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border-default px-3 py-1">
         <div className="flex items-center gap-1">
-          <Terminal size={14} className="text-gray-500" />
-          <span className="text-xs font-medium text-gray-400">Terminal</span>
+          <Terminal size={14} className="text-themed-muted" />
+          <span className="text-xs font-medium text-themed-secondary">Terminal</span>
           {/* Tabs */}
           <div className="ml-2 flex items-center gap-1">
             {tabs.map((tab) => (
@@ -100,7 +100,7 @@ export default function TerminalPanel(): JSX.Element | null {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex cursor-pointer items-center gap-1 rounded px-2 py-0.5 text-xs ${
-                  activeTab === tab.id ? 'bg-accent/10 text-accent' : 'text-gray-500 hover:text-gray-300'
+                  activeTab === tab.id ? 'bg-accent/10 text-accent' : 'text-themed-muted hover:text-themed-secondary'
                 }`}
               >
                 <span>{tab.title}</span>
@@ -115,16 +115,16 @@ export default function TerminalPanel(): JSX.Element | null {
           <select
             value={selectedShell}
             onChange={(e) => setSelectedShell(e.target.value)}
-            className="rounded border border-border-default bg-secondary px-2 py-0.5 text-xs text-gray-300"
+            className="rounded border border-border-default bg-secondary px-2 py-0.5 text-xs text-themed-secondary"
           >
             {shells.map((s) => (
               <option key={s.path} value={s.path}>{s.name}</option>
             ))}
           </select>
-          <button onClick={createTab} className="text-gray-500 hover:text-gray-300" title="New Terminal">
+          <button onClick={createTab} className="text-themed-muted hover:text-themed-secondary" title="New Terminal">
             <Plus size={14} />
           </button>
-          <button onClick={toggleTerminal} className="text-gray-500 hover:text-gray-300" title="Close Panel">
+          <button onClick={toggleTerminal} className="text-themed-muted hover:text-themed-secondary" title="Close Panel">
             <ChevronDown size={14} />
           </button>
         </div>
@@ -134,7 +134,7 @@ export default function TerminalPanel(): JSX.Element | null {
       <div className="flex h-[calc(100%-60px)] flex-col">
         {currentTab ? (
           <>
-            <div ref={outputRef} className="flex-1 overflow-auto p-2 font-mono text-xs leading-5 text-gray-300">
+            <div ref={outputRef} className="flex-1 overflow-auto p-2 font-mono text-xs leading-5 text-themed-secondary">
               {currentTab.output.map((line, i) => (
                 <pre key={i} className="whitespace-pre-wrap">{line}</pre>
               ))}
@@ -145,14 +145,14 @@ export default function TerminalPanel(): JSX.Element | null {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleInput}
                 placeholder="Type command and press Enter..."
-                className="w-full bg-transparent font-mono text-xs text-gray-200 outline-none placeholder:text-gray-600"
+                className="w-full bg-transparent font-mono text-xs text-themed outline-none placeholder:text-themed-muted"
                 autoFocus
               />
             </div>
           </>
         ) : (
-          <div className="flex flex-1 items-center justify-center text-gray-600 text-sm">
-            <button onClick={createTab} className="flex items-center gap-2 hover:text-gray-400">
+          <div className="flex flex-1 items-center justify-center text-themed-muted text-sm">
+            <button onClick={createTab} className="flex items-center gap-2 hover:text-themed-secondary">
               <Plus size={16} /> Create a new terminal
             </button>
           </div>

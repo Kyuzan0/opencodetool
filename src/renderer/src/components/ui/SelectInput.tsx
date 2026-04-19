@@ -26,8 +26,8 @@ export default function SelectInput({
 }: SelectInputProps): JSX.Element {
   return (
     <div className={`space-y-1 ${className}`}>
-      {label && <label className="block text-sm font-medium text-gray-300">{label}</label>}
-      {description && <p className="text-xs text-gray-500">{description}</p>}
+      {label && <label className="block text-sm font-medium text-themed-secondary">{label}</label>}
+      {description && <p className="text-xs text-themed-muted">{description}</p>}
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}

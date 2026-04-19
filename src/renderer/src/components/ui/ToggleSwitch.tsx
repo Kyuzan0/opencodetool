@@ -18,8 +18,8 @@ export default function ToggleSwitch({
   return (
     <div className={`flex items-center justify-between ${className}`}>
       <div>
-        {label && <span className="text-sm font-medium text-gray-300">{label}</span>}
-        {description && <p className="text-xs text-gray-500">{description}</p>}
+        {label && <span className="text-sm font-medium text-themed-secondary">{label}</span>}
+        {description && <p className="text-xs text-themed-muted">{description}</p>}
       </div>
       <button
         type="button"
@@ -28,7 +28,7 @@ export default function ToggleSwitch({
         onClick={() => !disabled && onChange(!checked)}
         disabled={disabled}
         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-50 ${
-          checked ? 'bg-accent' : 'bg-gray-600'
+          checked ? 'bg-accent' : 'toggle-track'
         }`}
       >
         <span

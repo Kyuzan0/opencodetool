@@ -94,17 +94,17 @@ export default function BackupDialog({ open, onClose, mode }: BackupDialogProps)
         </div>
       ) : mode === 'backup' ? (
         <div className="space-y-3">
-          <p className="text-sm text-gray-400">Select which configs to include in the backup:</p>
+          <p className="text-sm text-themed-secondary">Select which configs to include in the backup:</p>
           <ToggleSwitch label="opencode.json" description={configPath?.path || 'Not loaded'} checked={includeOpenCode} onChange={setIncludeOpenCode} />
           <ToggleSwitch label="oh-my-openagent.json" description={agentConfigPath?.path || 'Not loaded'} checked={includeAgent} onChange={setIncludeAgent} />
         </div>
       ) : (
         <div className="space-y-3">
-          <p className="text-sm text-gray-400">Select a .zip backup file to restore. Existing files will be backed up before overwriting.</p>
+          <p className="text-sm text-themed-secondary">Select a .zip backup file to restore. Existing files will be backed up before overwriting.</p>
           {previewFiles.length > 0 && (
             <div className="rounded border border-border-default p-2">
-              <p className="text-xs text-gray-500 mb-1">Files to restore:</p>
-              {previewFiles.map((f) => <p key={f} className="text-xs text-gray-300">{f}</p>)}
+              <p className="text-xs text-themed-muted mb-1">Files to restore:</p>
+              {previewFiles.map((f) => <p key={f} className="text-xs text-themed-secondary">{f}</p>)}
             </div>
           )}
         </div>
