@@ -32,9 +32,9 @@ export default function Modal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" onClick={onClose} />
       <div
-        className={`relative z-10 w-full max-w-lg rounded-xl border border-border-default bg-card shadow-elevated animate-slide-up overflow-hidden ${className}`}
+        className={`relative z-10 w-full max-w-lg max-h-[85vh] rounded-xl border border-border-default bg-card shadow-elevated animate-slide-up flex flex-col overflow-hidden ${className}`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-default">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-default shrink-0">
           <h2 className="text-base font-semibold text-themed tracking-tight">{title}</h2>
           <button
             onClick={onClose}
@@ -43,9 +43,9 @@ export default function Modal({
             <X size={18} />
           </button>
         </div>
-        <div className="px-6 py-5 text-sm text-themed-secondary">{children}</div>
+        <div className="px-6 py-5 text-sm text-themed-secondary overflow-y-auto flex-1 min-h-0">{children}</div>
         {actions && (
-          <div className="flex justify-end gap-2 px-6 py-4 border-t border-border-default bg-surface/50">
+          <div className="flex justify-end gap-2 px-6 py-4 border-t border-border-default bg-surface/50 shrink-0">
             {actions}
           </div>
         )}
