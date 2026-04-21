@@ -20,9 +20,7 @@ const api = {
     list: (configDir: string) => ipcRenderer.invoke('pm:list', configDir),
     detectOpenCode: () => ipcRenderer.invoke('pm:detect-opencode'),
     detectOpenCodeApp: () => ipcRenderer.invoke('pm:detect-opencode-app'),
-    installOpenCode: (pm: 'npm' | 'bun') => ipcRenderer.invoke('pm:install-opencode', pm),
-    openagentDoctor: () => ipcRenderer.invoke('pm:openagent-doctor'),
-    openagentVersion: () => ipcRenderer.invoke('pm:openagent-version')
+    installOpenCode: (pm: 'npm' | 'bun') => ipcRenderer.invoke('pm:install-opencode', pm)
   },
   shell: {
     detect: () => ipcRenderer.invoke('shell:detect'),

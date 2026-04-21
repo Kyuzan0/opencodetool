@@ -22,6 +22,7 @@ function createWindow(): void {
     minWidth: 900,
     minHeight: 600,
     show: false,
+    autoHideMenuBar: true,
     backgroundColor: '#0f0f0f',
     title: 'OpenCode Manager',
     icon: join(__dirname, '../../resources/icon.png'),
@@ -35,6 +36,13 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show()
+  })
+
+  // Disable DevTools
+  mainWindow.webContents.on('before-input-event', (_event, input) => {
+    if (input.key === 'F12' || (input.control && input.shift && input.key === 'I')) {
+      _event.preventDefault()
+    }
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -91,9 +99,7 @@ function createMenu(): void {
         { type: 'separator' },
         { role: 'zoomIn' },
         { role: 'zoomOut' },
-        { role: 'resetZoom' },
-        { type: 'separator' },
-        { role: 'toggleDevTools' }
+        { role: 'resetZoom' }
       ]
     },
     {
@@ -102,7 +108,6 @@ function createMenu(): void {
         { label: 'About OpenCode Manager', click: () => mainWindow?.webContents.send('menu:about') },
         { type: 'separator' },
         { label: 'OpenCode Documentation', click: () => shell.openExternal('https://opencode.ai') },
-        { label: 'oh-my-openagent Docs', click: () => shell.openExternal('https://github.com/code-yeongyu/oh-my-openagent') }
       ]
     }
   ]
@@ -131,7 +136,7 @@ app.whenReady().then(() => {
   createMenu()
 
   app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
+    // Skip optimizer.watchWindowShortcuts — it auto-opens DevTools on F12
   })
 
   createWindow()

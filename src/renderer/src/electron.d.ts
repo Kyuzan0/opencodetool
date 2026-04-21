@@ -36,8 +36,6 @@ export interface ElectronAPI {
     detectOpenCode: () => Promise<{ installed: boolean; version?: string; path?: string }>
     detectOpenCodeApp: () => Promise<{ installed: boolean; path?: string }>
     installOpenCode: (pm: 'npm' | 'bun') => Promise<{ stdout: string; stderr: string; exitCode: number }>
-    openagentDoctor: () => Promise<{ stdout: string; stderr: string; exitCode: number }>
-    openagentVersion: () => Promise<{ stdout: string; stderr: string; exitCode: number }>
   }
   shell: {
     detect: () => Promise<ShellInfo[]>

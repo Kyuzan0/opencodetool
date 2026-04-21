@@ -7,7 +7,6 @@ import {
   Puzzle,
   Wand2,
   Settings,
-  Cpu,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react'
@@ -16,7 +15,6 @@ const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/opencode-config', label: 'OpenCode Config', icon: FileJson },
   { path: '/agent-config', label: 'Agent Config', icon: Bot },
-  { path: '/kilo', label: 'Kilo + Openagent', icon: Cpu },
   { path: '/plugins', label: 'Plugins', icon: Puzzle },
   { path: '/skills', label: 'Skills', icon: Wand2 },
   { path: '/settings', label: 'Settings', icon: Settings }

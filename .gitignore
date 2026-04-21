@@ -1,6 +1,25 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
 out/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Lock files (using bun)
+package-lock.json
+
+# Backups
 bak/
-.sisyphus/evidence/
+
+# OpenCode tooling
+.sisyphus/
+
+# Environment
+.env
+.env.*
+
+# Logs
 *.log

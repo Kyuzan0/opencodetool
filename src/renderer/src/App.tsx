@@ -7,7 +7,6 @@ import AgentConfigPage from './pages/AgentConfigPage'
 import PluginsPage from './pages/PluginsPage'
 import SkillsPage from './pages/SkillsPage'
 import SettingsPage from './pages/SettingsPage'
-import KiloIntegrationPage from './pages/KiloIntegrationPage'
 import { useSettingsStore, useUiStore } from './stores'
 import { applyTheme } from './lib/theme'
 import { ToastContainer } from './components/ui/Toast'
@@ -52,7 +51,6 @@ function AppShell(): JSX.Element {
           <Route path="/agent-config" element={<AgentConfigPage />} />
           <Route path="/plugins" element={<PluginsPage />} />
           <Route path="/skills" element={<SkillsPage />} />
-          <Route path="/kilo" element={<KiloIntegrationPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>
