@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSettingsStore, useConfigStore, usePluginStore, useSkillStore } from '../stores'
 import { Card, TextInput, SelectInput, ToggleSwitch, Button, Modal } from '../components/ui'
-import { Moon, Sun, FolderOpen, ExternalLink, Trash2, AlertTriangle, CheckCircle, Database, FolderX } from 'lucide-react'
+import { Moon, Sun, FolderOpen, ExternalLink, Trash2, AlertTriangle, CheckCircle, Database, FolderX, Monitor } from 'lucide-react'
 import type { ShellInfo } from '@shared/types'
 
 interface UninstallTargets {
@@ -39,6 +39,10 @@ export default function SettingsPage(): JSX.Element {
   const [uninstalling, setUninstalling] = useState(false)
   const [uninstallResult, setUninstallResult] = useState<{ removed: string[]; errors: string[] } | null>(null)
   const [uninstallDone, setUninstallDone] = useState(false)
+  const [showDesktopUninstall, setShowDesktopUninstall] = useState(false)
+  const [desktopUninstalling, setDesktopUninstalling] = useState(false)
+  const [desktopInfo, setDesktopInfo] = useState<{ found: boolean; path: string; installPath: string } | null>(null)
+  const [desktopError, setDesktopError] = useState('')
 
   useEffect(() => {
     window.api.shell.detect().then(setShells).catch(() => {})
@@ -106,6 +110,34 @@ export default function SettingsPage(): JSX.Element {
       setUninstallResult({ removed: [], errors: [e instanceof Error ? e.message : 'Uninstall failed'] })
     } finally {
       setUninstalling(false)
+    }
+  }
+
+  async function openDesktopUninstallModal(): Promise<void> {
+    setDesktopError('')
+    try {
+      const info = await window.api.uninstall.desktopCheck()
+      setDesktopInfo(info)
+      setShowDesktopUninstall(true)
+    } catch (e: unknown) {
+      setDesktopError(e instanceof Error ? e.message : 'Failed to check OpenCode Desktop')
+    }
+  }
+
+  async function handleDesktopUninstall(): Promise<void> {
+    setDesktopUninstalling(true)
+    setDesktopError('')
+    try {
+      const result = await window.api.uninstall.desktopRun()
+      if (!result.success) {
+        setDesktopError(result.message)
+      } else {
+        setShowDesktopUninstall(false)
+      }
+    } catch (e: unknown) {
+      setDesktopError(e instanceof Error ? e.message : 'Failed to run uninstaller')
+    } finally {
+      setDesktopUninstalling(false)
     }
   }
 
@@ -184,7 +216,19 @@ export default function SettingsPage(): JSX.Element {
       </Card>
 
       <Card title="Danger Zone">
-        <div className="space-y-3">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-sm font-medium text-themed">Uninstall OpenCode Desktop</span>
+              <p className="text-xs text-themed-muted">Run the OpenCode Desktop uninstaller (uninstall.exe)</p>
+            </div>
+            <Button variant="secondary" onClick={openDesktopUninstallModal}>
+              <Monitor size={16} /> Uninstall Desktop
+            </Button>
+          </div>
+
+          <div className="border-t border-[var(--color-border-subtle)]" />
+
           {uninstallDone ? (
             <div className="flex items-center gap-2">
               <CheckCircle size={18} className="text-success" />
@@ -378,6 +422,65 @@ export default function SettingsPage(): JSX.Element {
             )}
           </div>
         )}
+      </Modal>
+
+      <Modal
+        open={showDesktopUninstall}
+        onClose={() => !desktopUninstalling && setShowDesktopUninstall(false)}
+        title="Uninstall OpenCode Desktop"
+        actions={
+          desktopInfo?.found ? (
+            <>
+              <Button variant="secondary" onClick={() => setShowDesktopUninstall(false)} disabled={desktopUninstalling}>Cancel</Button>
+              <Button variant="danger" onClick={handleDesktopUninstall} loading={desktopUninstalling}>
+                <Trash2 size={16} /> Run Uninstaller
+              </Button>
+            </>
+          ) : (
+            <Button variant="secondary" onClick={() => setShowDesktopUninstall(false)}>Close</Button>
+          )
+        }
+      >
+        <div className="space-y-4">
+          {desktopInfo?.found ? (
+            <>
+              <div className="flex items-center gap-2 rounded-xl border border-warning/20 bg-warning/[0.04] p-4">
+                <AlertTriangle size={18} className="text-warning shrink-0" />
+                <p className="text-xs text-warning">
+                  This will launch the OpenCode Desktop uninstaller. The uninstaller may ask for administrator permissions.
+                </p>
+              </div>
+              <div className="rounded-xl border border-[var(--color-border-subtle)] p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-themed-muted">Install Path</span>
+                  <span className="text-xs font-mono text-themed">{desktopInfo.installPath}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-themed-muted">Uninstaller</span>
+                  <span className="text-xs font-mono text-themed">{desktopInfo.path}</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2 rounded-xl border border-[var(--color-border-subtle)] p-4">
+              <FolderX size={18} className="text-themed-muted shrink-0" />
+              <div>
+                <p className="text-sm text-themed">OpenCode Desktop not found</p>
+                <p className="text-xs text-themed-muted mt-1">
+                  {desktopInfo?.installPath
+                    ? `Found install at ${desktopInfo.installPath} but uninstall.exe is missing`
+                    : 'Could not detect an OpenCode Desktop installation on this system'}
+                </p>
+              </div>
+            </div>
+          )}
+          {desktopError && (
+            <div className="flex items-center gap-2 rounded-xl border border-danger/20 bg-danger/[0.04] p-3">
+              <AlertTriangle size={16} className="text-danger shrink-0" />
+              <p className="text-xs text-danger">{desktopError}</p>
+            </div>
+          )}
+        </div>
       </Modal>
     </div>
   )

@@ -65,7 +65,9 @@ const api = {
   uninstall: {
     scan: () => ipcRenderer.invoke('uninstall:scan'),
     perform: (options: { cli: boolean; core: boolean; plugins: boolean; mcp: boolean; skills: boolean; sessions: boolean; projectData: boolean; projectPaths?: string[] }) =>
-      ipcRenderer.invoke('uninstall:perform', options)
+      ipcRenderer.invoke('uninstall:perform', options),
+    desktopCheck: () => ipcRenderer.invoke('uninstall:desktop-check'),
+    desktopRun: () => ipcRenderer.invoke('uninstall:desktop-run')
   },
   opencode: {
     status: () => ipcRenderer.invoke('opencode:status'),

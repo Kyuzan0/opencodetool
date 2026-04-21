@@ -82,6 +82,8 @@ export interface ElectronAPI {
       projectData: boolean
       projectPaths?: string[]
     }) => Promise<unknown>
+    desktopCheck: () => Promise<{ found: boolean; path: string; installPath: string }>
+    desktopRun: () => Promise<{ success: boolean; message: string }>
   }
   opencode: {
     status: () => Promise<unknown>
