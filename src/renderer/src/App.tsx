@@ -12,6 +12,7 @@ import { applyTheme } from './lib/theme'
 import { ToastContainer } from './components/ui/Toast'
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import { useUnsavedWarning } from './hooks/useUnsavedWarning'
+import UpdateNotification from './components/UpdateNotification'
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null }
@@ -55,6 +56,7 @@ function AppShell(): JSX.Element {
         </Route>
       </Routes>
       <ToastLayer />
+      <UpdateNotification />
     </>
   )
 }

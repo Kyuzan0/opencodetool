@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useSettingsStore, useConfigStore, usePluginStore, useSkillStore } from '../stores'
+import { useSettingsStore, useConfigStore, usePluginStore, useSkillStore, useUpdateStore } from '../stores'
 import { Card, TextInput, SelectInput, ToggleSwitch, Button, Modal } from '../components/ui'
-import { Moon, Sun, FolderOpen, ExternalLink, Trash2, AlertTriangle, CheckCircle, Database, FolderX, Monitor } from 'lucide-react'
+import { Moon, Sun, FolderOpen, ExternalLink, Trash2, AlertTriangle, CheckCircle, Database, FolderX, Monitor, RefreshCw } from 'lucide-react'
 import type { ShellInfo } from '@shared/types'
 
 interface UninstallTargets {
@@ -43,6 +43,7 @@ export default function SettingsPage(): JSX.Element {
   const [desktopUninstalling, setDesktopUninstalling] = useState(false)
   const [desktopInfo, setDesktopInfo] = useState<{ found: boolean; path: string; installPath: string } | null>(null)
   const [desktopError, setDesktopError] = useState('')
+  const { status: updateStatus, checkForUpdate, info: updateInfo } = useUpdateStore()
 
   useEffect(() => {
     window.api.shell.detect().then(setShells).catch(() => {})
@@ -207,6 +208,23 @@ export default function SettingsPage(): JSX.Element {
           <div className="flex items-center justify-between py-1">
             <span className="text-sm text-themed-secondary">Electron</span>
             <span className="text-sm text-themed">{window.electron?.process?.versions?.electron || 'N/A'}</span>
+          </div>
+          <div className="flex items-center justify-between py-1">
+            <span className="text-sm text-themed-secondary">Updates</span>
+            <div className="flex items-center gap-2">
+              {updateStatus === 'available' && updateInfo && (
+                <span className="text-xs text-accent font-medium">v{updateInfo.latestVersion} available</span>
+              )}
+              {updateStatus === 'idle' && updateInfo && !updateInfo.hasUpdate && (
+                <span className="text-xs text-themed-muted">Up to date</span>
+              )}
+              {updateStatus === 'error' && (
+                <span className="text-xs text-danger">Check failed</span>
+              )}
+              <Button variant="secondary" onClick={() => checkForUpdate()} loading={updateStatus === 'checking'} className="text-xs px-3 py-1.5">
+                <RefreshCw size={14} /> Check for Updates
+              </Button>
+            </div>
           </div>
           <div className="space-y-2 pt-2 border-t border-[var(--color-border-subtle)]">
             <a href="https://opencode.ai" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-accent hover:text-accent-hover"><ExternalLink size={14} /> OpenCode Documentation</a>

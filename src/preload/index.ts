@@ -101,6 +101,18 @@ const api = {
     removeListeners: () => {
       ipcRenderer.removeAllListeners('file-watcher:changed')
     }
+  },
+  update: {
+    check: () => ipcRenderer.invoke('update:check'),
+    download: (downloadUrl: string) => ipcRenderer.invoke('update:download', downloadUrl),
+    cancelDownload: () => ipcRenderer.invoke('update:cancel-download'),
+    install: (installerPath: string) => ipcRenderer.invoke('update:install', installerPath),
+    onDownloadProgress: (callback: (progress: { percent: number; transferredBytes: number; totalBytes: number }) => void) => {
+      ipcRenderer.on('update:download-progress', (_event, progress) => callback(progress))
+    },
+    removeListeners: () => {
+      ipcRenderer.removeAllListeners('update:download-progress')
+    }
   }
 }
 

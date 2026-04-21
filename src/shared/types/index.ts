@@ -63,3 +63,11 @@ export type {
   GitHubSkillJson,
   GitHubSkillInstallResult
 } from './github-skill-types'
+
+export type {
+  UpdateInfo,
+  UpdateDownloadProgress,
+  UpdateCheckResult,
+  UpdateDownloadResult,
+  UpdateInstallResult
+} from './update-types'

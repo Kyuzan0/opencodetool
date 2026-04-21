@@ -1,4 +1,4 @@
-import type { SmitherySkill, GitHubRepoInfo, GitHubSkillInstallResult, ShellInfo } from '../../shared/types'
+import type { SmitherySkill, GitHubRepoInfo, GitHubSkillInstallResult, ShellInfo, UpdateCheckResult, UpdateDownloadResult, UpdateDownloadProgress, UpdateInstallResult } from '../../shared/types'
 
 /**
  * Typed window.api interface matching preload/index.ts exactly.
@@ -108,6 +108,14 @@ export interface ElectronAPI {
     watch: (filePath: string) => Promise<void>
     unwatch: (filePath: string) => Promise<void>
     onChanged: (callback: (filePath: string) => void) => void
+    removeListeners: () => void
+  }
+  update: {
+    check: () => Promise<UpdateCheckResult>
+    download: (downloadUrl: string) => Promise<UpdateDownloadResult>
+    cancelDownload: () => Promise<{ success: boolean }>
+    install: (installerPath: string) => Promise<UpdateInstallResult>
+    onDownloadProgress: (callback: (progress: UpdateDownloadProgress) => void) => void
     removeListeners: () => void
   }
 }

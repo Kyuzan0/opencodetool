@@ -12,6 +12,7 @@ import { registerUninstallIpc } from './ipc/uninstall-ipc'
 import { registerOpenCodeControlIpc } from './ipc/opencode-control-ipc'
 import { registerSmitheryIpc } from './ipc/smithery-ipc'
 import { registerGitHubSkillIpc } from './ipc/github-skill-ipc'
+import { registerUpdateIpc } from './ipc/update-ipc'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -131,6 +132,7 @@ app.whenReady().then(() => {
   registerOpenCodeControlIpc()
   registerSmitheryIpc()
   registerGitHubSkillIpc()
+  registerUpdateIpc()
 
   // Create menu
   createMenu()
