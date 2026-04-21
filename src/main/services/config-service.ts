@@ -1,13 +1,43 @@
 import { readFile, writeFile, copyFile, access, stat } from 'fs/promises'
 import { existsSync, mkdirSync } from 'fs'
-import { join, dirname, extname, basename } from 'path'
+import { join, dirname, extname, basename, resolve } from 'path'
 import { homedir } from 'os'
 import * as jsonc from 'jsonc-parser'
 import type { ConfigLocation } from '@shared/types/app-types'
 
+/**
+ * Security: Validate that a config file path is within allowed directories.
+ * Prevents path traversal attacks from compromised renderer.
+ */
+function validateConfigPath(filePath: string): void {
+  const resolved = resolve(filePath)
+  const home = homedir()
+  const allowedPrefixes = [
+    join(home, '.config', 'opencode'),
+    join(home, '.config', 'kilo'),
+    join(home, '.opencode'),
+  ]
+  // Also allow APPDATA on Windows
+  const appData = process.env.APPDATA
+  if (appData) {
+    allowedPrefixes.push(join(appData, 'opencode'))
+  }
+  // Allow project-level .opencode directories and opencode.json/jsonc at project root
+  const ext = extname(resolved)
+  const base = basename(resolved)
+  const isProjectConfig = (resolved.includes('.opencode') || base === 'opencode.json' || base === 'opencode.jsonc') &&
+    (ext === '.json' || ext === '.jsonc')
+
+  const isAllowed = allowedPrefixes.some((p) => resolved.startsWith(p)) || isProjectConfig
+  if (!isAllowed) {
+    throw new Error(`Access denied: path "${filePath}" is outside allowed config directories`)
+  }
+}
+
 export async function readConfig(
   filePath: string
 ): Promise<{ data: Record<string, unknown>; raw: string; format: 'json' | 'jsonc' }> {
+  validateConfigPath(filePath)
   const raw = await readFile(filePath, 'utf-8')
   const format = detectFormat(filePath, raw)
   const errors: jsonc.ParseError[] = []
@@ -47,6 +77,7 @@ export async function writeConfig(
 }
 
 export async function backupConfig(filePath: string): Promise<string> {
+  validateConfigPath(filePath)
   const now = new Date()
   const dateFolder = now.toISOString().slice(0, 10) // YYYY-MM-DD
   const timeFolder = now.toTimeString().slice(0, 8).replace(/:/g, '-') // HH-mm-ss

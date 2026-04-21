@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, Menu, globalShortcut } from 'electron'
+import { app, shell, BrowserWindow, Menu, globalShortcut, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerConfigIpc } from './ipc/config-ipc'
@@ -10,6 +10,8 @@ import { registerBackupIpc } from './ipc/backup-ipc'
 import { registerProjectIpc } from './ipc/project-ipc'
 import { registerUninstallIpc } from './ipc/uninstall-ipc'
 import { registerOpenCodeControlIpc } from './ipc/opencode-control-ipc'
+import { registerSmitheryIpc } from './ipc/smithery-ipc'
+import { registerGitHubSkillIpc } from './ipc/github-skill-ipc'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -36,7 +38,15 @@ function createWindow(): void {
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    // Security: Only allow http/https URLs to prevent RCE via arbitrary URI schemes
+    try {
+      const url = new URL(details.url)
+      if (url.protocol === 'http:' || url.protocol === 'https:') {
+        shell.openExternal(details.url)
+      }
+    } catch {
+      // Invalid URL — silently deny
+    }
     return { action: 'deny' }
   })
 
@@ -114,6 +124,8 @@ app.whenReady().then(() => {
   registerProjectIpc()
   registerUninstallIpc()
   registerOpenCodeControlIpc()
+  registerSmitheryIpc()
+  registerGitHubSkillIpc()
 
   // Create menu
   createMenu()
@@ -133,6 +145,19 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+})
+
+// Global error handlers — prevent silent crashes
+process.on('uncaughtException', (error) => {
+  console.error('[Main] Uncaught exception:', error)
+  dialog.showErrorBox(
+    'Unexpected Error',
+    `An unexpected error occurred:\n\n${error.message}\n\nThe application may be unstable. Please restart.`
+  )
+})
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Main] Unhandled rejection:', reason)
 })
 
 // H3 Fix: Kill all terminal processes before quit

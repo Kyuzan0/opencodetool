@@ -78,6 +78,20 @@ const api = {
     openDirectory: () => ipcRenderer.invoke('dialog:open-directory'),
     saveFile: (options?: Record<string, unknown>) => ipcRenderer.invoke('dialog:save-file', options)
   },
+  githubSkill: {
+    info: (url: string) => ipcRenderer.invoke('github-skill:info', url),
+    install: (url: string, skillDir: string) => ipcRenderer.invoke('github-skill:install', url, skillDir)
+  },
+  smithery: {
+    list: (namespace: string) =>
+      ipcRenderer.invoke('smithery:list', namespace),
+    get: (namespace: string, slug: string) =>
+      ipcRenderer.invoke('smithery:get', namespace, slug),
+    fetchContent: (gitUrl: string) =>
+      ipcRenderer.invoke('smithery:fetch-content', gitUrl),
+    install: (skillDir: string, name: string, gitUrl: string) =>
+      ipcRenderer.invoke('smithery:install', skillDir, name, gitUrl)
+  },
   fileWatcher: {
     watch: (filePath: string) => ipcRenderer.invoke('file-watcher:watch', filePath),
     unwatch: (filePath: string) => ipcRenderer.invoke('file-watcher:unwatch', filePath),
@@ -98,8 +112,6 @@ if (process.contextIsolated) {
     console.error(error)
   }
 } else {
-  // @ts-ignore
-  window.electron = electronAPI
-  // @ts-ignore
-  window.api = api
+  ;(window as Record<string, unknown>).electron = electronAPI
+  ;(window as Record<string, unknown>).api = api
 }

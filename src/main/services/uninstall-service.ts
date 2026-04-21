@@ -122,13 +122,15 @@ async function removePath(target: string, result: UninstallResult, retries = 3):
       await rm(target, { recursive: s.isDirectory(), force: true, maxRetries: 3, retryDelay: 500 })
       result.removed.push(target)
       return
-    } catch (e: any) {
-      if (attempt < retries && (e.code === 'EBUSY' || e.code === 'EPERM' || e.code === 'ENOTEMPTY')) {
+    } catch (e: unknown) {
+      const err = e instanceof Error ? e : new Error(String(e))
+      const code = (e as NodeJS.ErrnoException).code
+      if (attempt < retries && (code === 'EBUSY' || code === 'EPERM' || code === 'ENOTEMPTY')) {
         // Wait longer on each retry
         await sleep(1000 * attempt)
         continue
       }
-      result.errors.push(`Failed to remove ${target}: ${e.message}`)
+      result.errors.push(`Failed to remove ${target}: ${err.message}`)
     }
   }
 }
@@ -154,8 +156,9 @@ async function removeCli(result: UninstallResult): Promise<void> {
     } else {
       result.errors.push(`Failed to uninstall CLI: ${npmResult.stderr || 'unknown error'}`)
     }
-  } catch (e: any) {
-    result.errors.push(`Failed to uninstall CLI: ${e.message}`)
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e)
+    result.errors.push(`Failed to uninstall CLI: ${message}`)
   }
 }
 
@@ -407,8 +410,9 @@ export async function performUninstall(options: UninstallOptions): Promise<Unins
     for (const proc of killed) {
       result.removed.push(`Killed process: ${proc}`)
     }
-  } catch (e: any) {
-    result.errors.push(`Warning: Could not kill processes: ${e.message}`)
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e)
+    result.errors.push(`Warning: Could not kill processes: ${message}`)
   }
 
   // Step 2: Perform removal in order (CLI first, then data, then config)

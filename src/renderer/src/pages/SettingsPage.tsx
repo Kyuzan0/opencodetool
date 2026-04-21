@@ -102,8 +102,8 @@ export default function SettingsPage(): JSX.Element {
       if (result.removed.length > 0) {
         setUninstallDone(true)
       }
-    } catch (e: any) {
-      setUninstallResult({ removed: [], errors: [e.message || 'Uninstall failed'] })
+    } catch (e: unknown) {
+      setUninstallResult({ removed: [], errors: [e instanceof Error ? e.message : 'Uninstall failed'] })
     } finally {
       setUninstalling(false)
     }

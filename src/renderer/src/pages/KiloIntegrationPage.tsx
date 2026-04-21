@@ -163,8 +163,8 @@ export default function KiloIntegrationPage(): JSX.Element {
       } else {
         setDoctorError(stripAnsi(result.stderr || 'Doctor check failed'))
       }
-    } catch (e: any) {
-      setDoctorError(e.message || 'Failed to run doctor')
+    } catch (e: unknown) {
+      setDoctorError(e instanceof Error ? e.message : 'Failed to run doctor')
     } finally {
       setDoctorLoading(false)
     }
@@ -206,8 +206,8 @@ export default function KiloIntegrationPage(): JSX.Element {
         const errLines = stripAnsi(result.stderr || '').split('\n').filter((l) => l.trim())
         setInstallLog((prev) => [...prev, ...errLines.map((l) => `Error: ${l}`)])
       }
-    } catch (e: any) {
-      setInstallLog((prev) => [...prev, `Error: ${e.message || 'Install failed'}`])
+    } catch (e: unknown) {
+      setInstallLog((prev) => [...prev, `Error: ${e instanceof Error ? e.message : 'Install failed'}`])
     } finally {
       setInstalling(false)
     }

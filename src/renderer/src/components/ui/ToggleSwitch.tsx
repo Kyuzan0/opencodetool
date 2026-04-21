@@ -25,6 +25,7 @@ export default function ToggleSwitch({
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-label={label || undefined}
         onClick={() => !disabled && onChange(!checked)}
         disabled={disabled}
         className={`relative inline-flex h-[22px] w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-2 focus:ring-offset-primary disabled:opacity-40 disabled:cursor-not-allowed ${

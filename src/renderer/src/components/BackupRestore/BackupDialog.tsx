@@ -33,8 +33,8 @@ export default function BackupDialog({ open, onClose, mode }: BackupDialogProps)
         await window.api.backup.create(paths, savePath)
         setResult(`Backup saved to ${savePath}`)
       }
-    } catch (e: any) {
-      setResult(`Error: ${e.message}`)
+    } catch (e: unknown) {
+      setResult(`Error: ${e instanceof Error ? e.message : String(e)}`)
     } finally {
       setLoading(false)
     }
@@ -58,8 +58,8 @@ export default function BackupDialog({ open, onClose, mode }: BackupDialogProps)
 
       const res = await window.api.backup.restore(zipPath, targetDir)
       setResult(`Restored ${res.restored.length} file(s): ${res.restored.join(', ')}`)
-    } catch (e: any) {
-      setResult(`Error: ${e.message}`)
+    } catch (e: unknown) {
+      setResult(`Error: ${e instanceof Error ? e.message : String(e)}`)
     } finally {
       setLoading(false)
     }

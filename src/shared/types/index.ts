@@ -52,3 +52,14 @@ export type {
   CommandResult,
   IpcChannels
 } from './ipc-types'
+
+export type {
+  SmitherySkill,
+  SmitheryListResponse
+} from './smithery-types'
+
+export type {
+  GitHubRepoInfo,
+  GitHubSkillJson,
+  GitHubSkillInstallResult
+} from './github-skill-types'

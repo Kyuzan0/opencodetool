@@ -23,6 +23,13 @@ export function useKeyboardShortcuts(): void {
         return
       }
 
+      // Ctrl+S: Trigger save via menu event (config pages listen for this)
+      if (ctrl && e.key === 's') {
+        e.preventDefault()
+        window.dispatchEvent(new CustomEvent('menu:save'))
+        return
+      }
+
       if (ctrl && e.key === '1') { e.preventDefault(); navigate('/'); return }
       if (ctrl && e.key === '2') { e.preventDefault(); navigate('/opencode-config'); return }
       if (ctrl && e.key === '3') { e.preventDefault(); navigate('/agent-config'); return }

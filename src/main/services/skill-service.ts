@@ -4,6 +4,71 @@ import { join, basename, extname } from 'path'
 import { homedir } from 'os'
 import type { SkillInfo } from '@shared/types/app-types'
 
+/**
+ * Detect a directory-based skill (e.g. GitHub repo with skill.json or README.md)
+ */
+async function detectDirectorySkill(dirPath: string, dirName: string): Promise<SkillInfo | null> {
+  // Check for skill.json first
+  const skillJsonPath = join(dirPath, 'skill.json')
+  if (existsSync(skillJsonPath)) {
+    try {
+      const raw = await readFile(skillJsonPath, 'utf-8')
+      const meta = JSON.parse(raw)
+      return {
+        name: dirName,
+        path: dirPath,
+        description: meta.displayName || meta.description || dirName,
+        priority: 0,
+        content: `[Directory skill] ${meta.displayName || dirName}\n${meta.description || ''}\nVersion: ${meta.version || 'unknown'}`
+      }
+    } catch {
+      // Invalid skill.json, fall through
+    }
+  }
+
+  // Check for README.md
+  const readmePath = join(dirPath, 'README.md')
+  if (existsSync(readmePath)) {
+    try {
+      const content = await readFile(readmePath, 'utf-8')
+      const firstLine = content.split('\n').find((l) => l.trim().length > 0) || ''
+      const description = firstLine.replace(/^#+\s*/, '').trim()
+      return {
+        name: dirName,
+        path: dirPath,
+        description: description || dirName,
+        priority: 0,
+        content: content
+      }
+    } catch {
+      // Can't read README
+    }
+  }
+
+  // Check for any .md file inside
+  try {
+    const entries = await readdir(dirPath)
+    const mdFile = entries.find((e) => extname(e) === '.md')
+    if (mdFile) {
+      const mdPath = join(dirPath, mdFile)
+      const content = await readFile(mdPath, 'utf-8')
+      const firstLine = content.split('\n').find((l) => l.trim().length > 0) || ''
+      const description = firstLine.replace(/^#+\s*/, '').trim()
+      return {
+        name: dirName,
+        path: dirPath,
+        description: description || dirName,
+        priority: 0,
+        content: content
+      }
+    }
+  } catch {
+    // Skip
+  }
+
+  return null
+}
+
 export async function listSkills(skillDir: string): Promise<SkillInfo[]> {
   const skills: SkillInfo[] = []
   const dirs = [skillDir]
@@ -25,6 +90,7 @@ export async function listSkills(skillDir: string): Promise<SkillInfo[]> {
         const fullPath = join(dir, entry)
         const s = await stat(fullPath)
         if (s.isFile() && extname(entry) === '.md') {
+          // Single .md skill file
           const content = await readFile(fullPath, 'utf-8')
           const firstLine = content.split('\n').find((l) => l.trim().length > 0) || ''
           const description = firstLine.replace(/^#+\s*/, '').trim()
@@ -35,6 +101,12 @@ export async function listSkills(skillDir: string): Promise<SkillInfo[]> {
             priority: skills.length,
             content
           })
+        } else if (s.isDirectory()) {
+          // Directory-based skill (e.g. installed from GitHub)
+          const dirSkill = await detectDirectorySkill(fullPath, entry)
+          if (dirSkill) {
+            skills.push({ ...dirSkill, priority: skills.length })
+          }
         }
       }
     } catch {
@@ -54,7 +126,7 @@ function validateSkillPath(filePath: string): void {
     join(home, '.opencode')
   ]
   const isAllowed = allowedPrefixes.some((p) => resolved.startsWith(p)) ||
-    (resolved.includes('.opencode') && extname(resolved) === '.md')
+    (resolved.includes('.opencode') && (extname(resolved) === '.md' || existsSync(resolved)))
   if (!isAllowed) {
     throw new Error(`Access denied: path "${filePath}" is outside allowed skill directories`)
   }

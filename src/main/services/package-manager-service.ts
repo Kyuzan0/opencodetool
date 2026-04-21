@@ -271,7 +271,7 @@ export function runCommand(
       resolve({
         stdout: stdout || '',
         stderr: stderr || '',
-        exitCode: error ? (error as any).code || 1 : 0
+        exitCode: error ? ((error as { code?: number }).code ?? 1) : 0
       })
     })
     proc.on('error', (err) => reject(err))

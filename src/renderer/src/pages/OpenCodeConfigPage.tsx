@@ -44,10 +44,12 @@ export default function OpenCodeConfigPage(): JSX.Element {
   const [expandedProviders, setExpandedProviders] = useState<Set<number>>(new Set())
   const [externalChangeDetected, setExternalChangeDetected] = useState(false)
   const watchedPathRef = useRef<string | null>(null)
+  const [confirmDeleteProvider, setConfirmDeleteProvider] = useState<string | null>(null)
+  const [confirmDeleteModel, setConfirmDeleteModel] = useState<string | null>(null)
 
   // File watcher: detect external changes
   useEffect(() => {
-    const fileWatcherApi = (window.api as any).fileWatcher
+    const fileWatcherApi = window.api.fileWatcher
     if (!fileWatcherApi) return
 
     const handleChange = (changedPath: string): void => {
@@ -64,7 +66,7 @@ export default function OpenCodeConfigPage(): JSX.Element {
 
   // Start/stop watching when configPath changes
   useEffect(() => {
-    const fileWatcherApi = (window.api as any).fileWatcher
+    const fileWatcherApi = window.api.fileWatcher
     if (!fileWatcherApi) return
 
     // Unwatch previous path
@@ -86,6 +88,13 @@ export default function OpenCodeConfigPage(): JSX.Element {
       }
     }
   }, [configPath?.path])
+
+  // Listen for Ctrl+S save shortcut
+  useEffect(() => {
+    const onSave = (): void => { handleSave() }
+    window.addEventListener('menu:save', onSave)
+    return () => window.removeEventListener('menu:save', onSave)
+  })
 
   useEffect(() => { if (!openCodeConfig) loadConfig() }, [])
 
@@ -116,13 +125,13 @@ export default function OpenCodeConfigPage(): JSX.Element {
     setLoading(true)
     try {
       const locs = await window.api.config.locations()
-      const loc = locs.find((l: any) => l.path.includes('opencode.json') && !l.path.includes('oh-my-'))
+      const loc = locs.find((l) => l.path.includes('opencode.json') && !l.path.includes('oh-my-'))
       if (loc) {
         setConfigPath(loc)
         const r = await window.api.config.read(loc.path)
         setOpenCodeConfig(r.data as OpenCodeConfig)
       }
-    } catch (e: any) { setError(e.message || 'Failed to load') }
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Failed to load') }
     finally { setLoading(false) }
   }
 
@@ -130,9 +139,9 @@ export default function OpenCodeConfigPage(): JSX.Element {
     if (!openCodeConfig || !configPath) return
     setSaveLoading(true)
     try {
-      await window.api.config.write(configPath.path, openCodeConfig as any, { format: configPath.format || 'json' })
+      await window.api.config.write(configPath.path, openCodeConfig, { format: configPath.format || 'json' })
       setDirty(false)
-    } catch (e: any) { setError(e.message || 'Failed to save') }
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Failed to save') }
     finally { setSaveLoading(false) }
   }
 
@@ -144,18 +153,17 @@ export default function OpenCodeConfigPage(): JSX.Element {
       setOpenCodeConfig(r.data as OpenCodeConfig)
       setExternalChangeDetected(false)
       setDirty(false)
-    } catch (e: any) { setError(e.message || 'Failed to reload') }
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Failed to reload') }
     finally { setLoading(false) }
   }
 
   async function handleOpenExternal(): Promise<void> {
     if (!configPath?.path) return
     try {
-      const configApi = window.api.config as any
-      const error = await configApi.openExternal(configPath.path)
+      const error = await window.api.config.openExternal(configPath.path)
       if (error) setError(`Gagal membuka editor: ${error}`)
-    } catch (e: any) {
-      setError(e.message || 'Gagal membuka file di editor eksternal')
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Gagal membuka file di editor eksternal')
     }
   }
 
@@ -167,15 +175,15 @@ export default function OpenCodeConfigPage(): JSX.Element {
         setOpenCodeConfig(r.data as OpenCodeConfig)
         setDirty(true)
       }
-    } catch (e: any) { setError(e.message || 'Import failed') }
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Import failed') }
   }
 
   async function handleExport(): Promise<void> {
     if (!openCodeConfig) return
     try {
       const fp = await window.api.dialog.saveFile({ defaultPath: 'opencode.json', filters: [{ name: 'JSON', extensions: ['json'] }] })
-      if (fp) await window.api.config.write(fp, openCodeConfig as any, { format: 'json' })
-    } catch (e: any) { setError(e.message || 'Export failed') }
+      if (fp) await window.api.config.write(fp, openCodeConfig as Record<string, unknown>, { format: 'json' })
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Export failed') }
   }
 
   function uc(path: string, value: unknown): void {
@@ -248,12 +256,11 @@ export default function OpenCodeConfigPage(): JSX.Element {
   async function handleCreateConfig(): Promise<void> {
     setLoading(true)
     try {
-      const configApi = window.api.config as any
-      const createdPath: string = await configApi.createDefault('opencode')
+      const createdPath: string = await window.api.config.createDefault('opencode')
       // Reload to pick up the new file
       await loadConfig()
-    } catch (e: any) {
-      setError(e.message || 'Gagal membuat config')
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Gagal membuat config')
     } finally {
       setLoading(false)
     }
@@ -334,7 +341,7 @@ export default function OpenCodeConfigPage(): JSX.Element {
                     }}
                   />
                   <div className="pt-2 border-t border-[var(--color-border-subtle)]">
-                    <Button variant="danger" onClick={() => removeProvider(name)}><Trash2 size={14} /> Remove Provider</Button>
+                    <Button variant="danger" onClick={() => setConfirmDeleteProvider(name)}><Trash2 size={14} /> Remove Provider</Button>
                   </div>
                 </div>
               </Card>
@@ -363,7 +370,7 @@ export default function OpenCodeConfigPage(): JSX.Element {
                       <ArrayEditor label="Input Modalities" items={model.modalities?.input || []} onChange={(items) => umf(mk, 'modalities', { ...(model.modalities || {}), input: items })} placeholder="e.g. text" />
                       <ArrayEditor label="Output Modalities" items={model.modalities?.output || []} onChange={(items) => umf(mk, 'modalities', { ...(model.modalities || {}), output: items })} placeholder="e.g. text" />
                       <div className="pt-2 border-t border-border-default">
-                        <Button variant="danger" onClick={() => removeModel(mk)}><Trash2 size={14} /> Remove Model</Button>
+                        <Button variant="danger" onClick={() => setConfirmDeleteModel(mk)}><Trash2 size={14} /> Remove Model</Button>
                       </div>
                     </div>
                   </Card>
@@ -423,6 +430,36 @@ export default function OpenCodeConfigPage(): JSX.Element {
           />
         )}
       </div>
+
+      {/* Confirm Delete Provider */}
+      <Modal
+        open={!!confirmDeleteProvider}
+        onClose={() => setConfirmDeleteProvider(null)}
+        title="Remove Provider"
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setConfirmDeleteProvider(null)}>Cancel</Button>
+            <Button variant="danger" onClick={() => { if (confirmDeleteProvider) removeProvider(confirmDeleteProvider); setConfirmDeleteProvider(null) }}>Remove</Button>
+          </>
+        }
+      >
+        <p className="text-sm text-themed-secondary">Are you sure you want to remove provider <strong className="text-themed">{confirmDeleteProvider}</strong>? This will also remove all its models.</p>
+      </Modal>
+
+      {/* Confirm Delete Model */}
+      <Modal
+        open={!!confirmDeleteModel}
+        onClose={() => setConfirmDeleteModel(null)}
+        title="Remove Model"
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setConfirmDeleteModel(null)}>Cancel</Button>
+            <Button variant="danger" onClick={() => { if (confirmDeleteModel) removeModel(confirmDeleteModel); setConfirmDeleteModel(null) }}>Remove</Button>
+          </>
+        }
+      >
+        <p className="text-sm text-themed-secondary">Are you sure you want to remove model <strong className="text-themed">{confirmDeleteModel}</strong>?</p>
+      </Modal>
     </div>
   )
 }

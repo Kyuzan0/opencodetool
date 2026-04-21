@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import type { OpenCodeConfig } from '../../../shared/types'
 import {
   useConfigStore,
   usePluginStore,
@@ -78,10 +79,10 @@ export default function DashboardPage(): JSX.Element {
 
   async function refreshRuntimeStatus(): Promise<void> {
     try {
-      const status = await (window.api as any).opencode.status()
+      const status = await window.api.opencode.status()
       setRuntimeStatus(status)
-    } catch (e: any) {
-      appendRuntimeLog(`Gagal membaca status runtime: ${e.message || 'unknown error'}`)
+    } catch (e: unknown) {
+      appendRuntimeLog(`Gagal membaca status runtime: ${e instanceof Error ? e.message : 'unknown error'}`)
     }
   }
 
@@ -93,7 +94,7 @@ export default function DashboardPage(): JSX.Element {
     const busyKey = `${mode}:${action}`
     setRuntimeBusy(busyKey)
     try {
-      const opencodeApi = (window.api as any).opencode
+      const opencodeApi = window.api.opencode
       if (!opencodeApi) throw new Error('OpenCode runtime API tidak tersedia')
 
       let result: { running: boolean; port?: number | null }
@@ -120,8 +121,8 @@ export default function DashboardPage(): JSX.Element {
       appendRuntimeLog(
         `${modeLabel} ${action} -> ${result.running ? 'running' : 'stopped'}${portSuffix}`
       )
-    } catch (e: any) {
-      const errorMsg: string = e.message || 'unknown error'
+    } catch (e: unknown) {
+      const errorMsg: string = e instanceof Error ? e.message : 'unknown error'
 
       if (errorMsg.startsWith('PORT_IN_USE:') && !force) {
         const busyPort = errorMsg.split(':')[1]
@@ -147,8 +148,8 @@ export default function DashboardPage(): JSX.Element {
         const first = locations[0]
         useConfigStore.getState().setConfigPath(first)
         const result = await window.api.config.read(first.path)
-        useConfigStore.getState().setOpenCodeConfig(result.data as any)
-        const pluginList = (result.data as any).plugin || []
+        useConfigStore.getState().setOpenCodeConfig(result.data as OpenCodeConfig)
+        const pluginList = (result.data as OpenCodeConfig).plugin || []
         usePluginStore.getState().setPlugins(
           pluginList.map((name: string) => ({
             name,
@@ -183,7 +184,7 @@ export default function DashboardPage(): JSX.Element {
 
   async function detectOpenCodeApp(): Promise<void> {
     try {
-      const result = await (window.api as any).pm.detectOpenCodeApp()
+      const result = await window.api.pm.detectOpenCodeApp()
       setOcAppStatus(result)
     } catch {
       setOcAppStatus({
@@ -207,8 +208,8 @@ export default function DashboardPage(): JSX.Element {
       } else {
         setInstallLog((prev) => [...prev, `Error: ${result.stderr || 'Install failed'}`])
       }
-    } catch (e: any) {
-      setInstallLog((prev) => [...prev, `Error: ${e.message || 'Install failed'}`])
+    } catch (e: unknown) {
+      setInstallLog((prev) => [...prev, `Error: ${e instanceof Error ? e.message : 'Install failed'}`])
     } finally {
       setInstalling(false)
     }
@@ -216,12 +217,15 @@ export default function DashboardPage(): JSX.Element {
 
   async function handleCreateConfig(): Promise<void> {
     try {
-      const configApi = window.api.config as any
-      const createdPath: string = await configApi.createDefault('opencode')
-      appendRuntimeLog(`Config dibuat: ${createdPath}`)
-      await loadConfigLocations(true)
-    } catch (e: any) {
-      appendRuntimeLog(`Gagal membuat config: ${e.message || 'unknown error'}`)
+      const result = await window.api.config.createDefault({ type: 'opencode', path: '' })
+      if (result.success && result.path) {
+        appendRuntimeLog(`Config dibuat: ${result.path}`)
+        await loadConfigLocations(true)
+      } else {
+        appendRuntimeLog(`Gagal membuat config: ${result.error || 'unknown error'}`)
+      }
+    } catch (e: unknown) {
+      appendRuntimeLog(`Gagal membuat config: ${e instanceof Error ? e.message : 'unknown error'}`)
     }
   }
 
@@ -427,12 +431,14 @@ export default function DashboardPage(): JSX.Element {
               {!ocAppStatus?.found && (
                 <Button
                   variant="secondary"
-                  onClick={() =>
-                    (window as any).electron?.shell?.openExternal?.(
-                      'https://opencode.ai/download/stable/windows-x64-nsis'
-                    ) ||
-                    window.open('https://opencode.ai/download/stable/windows-x64-nsis')
-                  }
+                  onClick={() => {
+                    const url = 'https://opencode.ai/download/stable/windows-x64-nsis'
+                    if (window.electron?.platform) {
+                      window.api.config.openExternal(url)
+                    } else {
+                      window.open(url)
+                    }
+                  }}
                 >
                   <Monitor size={15} /> Download Desktop App
                 </Button>

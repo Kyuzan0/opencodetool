@@ -109,19 +109,19 @@ export default function PluginsPage(): JSX.Element {
       const freshConfig = freshResult.data as Record<string, unknown>
       // Only update the plugin array, preserve everything else from disk
       freshConfig.plugin = newList
-      setOpenCodeConfig(freshConfig as any)
+      setOpenCodeConfig(freshConfig)
       setDirty(false)
       await window.api.config.write(configPath.path, freshConfig, {
         format: configPath.format || 'json'
       })
-    } catch (e: any) {
+    } catch (e: unknown) {
       // Fallback: update in-memory config if disk read fails
       if (openCodeConfig) {
         const updated = { ...openCodeConfig, plugin: newList }
         setOpenCodeConfig(updated)
         setDirty(true)
       }
-      setError(`Gagal menyimpan plugin list: ${e.message || 'unknown error'}`)
+      setError(`Gagal menyimpan plugin list: ${e instanceof Error ? e.message : 'unknown error'}`)
     }
   }
 
@@ -176,8 +176,8 @@ export default function PluginsPage(): JSX.Element {
         const errLines = formatLogOutput(result.stderr || 'Install failed')
         setLogLines((prev) => [...prev, ...errLines.map((l) => `Error: ${l}`), ''])
       }
-    } catch (e: any) {
-      const errLines = formatLogOutput(e.message || 'Install failed')
+    } catch (e: unknown) {
+      const errLines = formatLogOutput(e instanceof Error ? e.message : 'Install failed')
       setLogLines((prev) => [...prev, ...errLines.map((l) => `Error: ${l}`), ''])
     } finally {
       setInstalling(false)
@@ -207,12 +207,12 @@ export default function PluginsPage(): JSX.Element {
         const errLines = formatLogOutput(result.stderr || '')
         setLogLines((prev) => [...prev, `Removed ${name} from config`, ...errLines, ''])
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       // Even on error, remove from config list so it doesn't persist
       removeFromStore(name)
       const currentPlugins = useConfigStore.getState().openCodeConfig?.plugin || []
       await updatePluginList(currentPlugins.filter((p) => p !== name))
-      setLogLines((prev) => [...prev, `Removed ${name} from config (package manager error: ${e.message || 'unknown'})`, ''])
+      setLogLines((prev) => [...prev, `Removed ${name} from config (package manager error: ${e instanceof Error ? e.message : 'unknown'})`, ''])
     } finally { setInstalling(false) }
   }
 

@@ -7,11 +7,17 @@ interface JsonPreviewPanelProps {
   className?: string
 }
 
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
 function highlightJson(json: string): JSX.Element[] {
   return json.split('\n').map((line, i) => {
-    const highlighted = line
-      .replace(/"([^"]+)":/g, '<span class="text-purple-400">"$1"</span>:')
-      .replace(/: "([^"]*)"/g, ': <span class="text-green-400">"$1"</span>')
+    // Security: Escape HTML entities BEFORE applying syntax highlighting spans
+    const escaped = escapeHtml(line)
+    const highlighted = escaped
+      .replace(/&quot;([^&]*)&quot;:/g, '<span class="text-purple-400">&quot;$1&quot;</span>:')
+      .replace(/: &quot;([^&]*)&quot;/g, ': <span class="text-green-400">&quot;$1&quot;</span>')
       .replace(/: (\d+)/g, ': <span class="text-blue-400">$1</span>')
       .replace(/: (true|false)/g, ': <span class="text-orange-400">$1</span>')
       .replace(/: (null)/g, ': <span class="text-gray-500">$1</span>')

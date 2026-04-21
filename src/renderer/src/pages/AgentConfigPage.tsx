@@ -5,7 +5,7 @@ import {
   KeyValueEditor, ArrayEditor, JsonEditor, Button, Modal, TextArea
 } from '../components/ui'
 import { Save, RefreshCw, Upload, Download, Plus, Trash2, ExternalLink, FilePlus } from 'lucide-react'
-import type { AgentPluginConfig, AgentOverride, CategoryConfig, McpConfig } from '@shared/types'
+import type { AgentPluginConfig, AgentOverride, CategoryConfig, McpConfig, AgentVariant } from '@shared/types'
 import { BUILTIN_AGENTS, CATEGORIES } from '@shared/types'
 
 const TABS = [
@@ -37,10 +37,12 @@ export default function AgentConfigPage(): JSX.Element {
   const [newMcpName, setNewMcpName] = useState('')
   const [externalChangeDetected, setExternalChangeDetected] = useState(false)
   const watchedPathRef = useRef<string | null>(null)
+  const [confirmDeleteAgent, setConfirmDeleteAgent] = useState<string | null>(null)
+  const [confirmDeleteMcp, setConfirmDeleteMcp] = useState<string | null>(null)
 
   // File watcher: detect external changes
   useEffect(() => {
-    const fileWatcherApi = (window.api as any).fileWatcher
+    const fileWatcherApi = window.api.fileWatcher
     if (!fileWatcherApi) return
 
     const handleChange = (changedPath: string): void => {
@@ -57,7 +59,7 @@ export default function AgentConfigPage(): JSX.Element {
 
   // Start/stop watching when agentConfigPath changes
   useEffect(() => {
-    const fileWatcherApi = (window.api as any).fileWatcher
+    const fileWatcherApi = window.api.fileWatcher
     if (!fileWatcherApi) return
 
     if (watchedPathRef.current && watchedPathRef.current !== agentConfigPath?.path) {
@@ -78,13 +80,20 @@ export default function AgentConfigPage(): JSX.Element {
     }
   }, [agentConfigPath?.path])
 
+  // Listen for Ctrl+S save shortcut
+  useEffect(() => {
+    const onSave = (): void => { handleSave() }
+    window.addEventListener('menu:save', onSave)
+    return () => window.removeEventListener('menu:save', onSave)
+  })
+
   useEffect(() => { if (!agentConfig) loadConfig() }, [])
 
   async function loadConfig(): Promise<void> {
     setLoading(true)
     try {
       const locs = await window.api.config.locations()
-      const loc = locs.find((l: any) => l.path.includes('oh-my-open'))
+      const loc = locs.find((l) => l.path.includes('oh-my-open'))
       if (loc) {
         setAgentConfigPath(loc)
         const r = await window.api.config.read(loc.path)
@@ -92,7 +101,7 @@ export default function AgentConfigPage(): JSX.Element {
       } else {
         setAgentConfig({ agents: {}, categories: {} })
       }
-    } catch (e: any) { setError(e.message || 'Failed to load agent config') }
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Failed to load agent config') }
     finally { setLoading(false) }
   }
 
@@ -100,9 +109,9 @@ export default function AgentConfigPage(): JSX.Element {
     if (!agentConfig || !agentConfigPath) return
     setSaveLoading(true)
     try {
-      await window.api.config.write(agentConfigPath.path, agentConfig as any, { format: agentConfigPath.format || 'json' })
+      await window.api.config.write(agentConfigPath.path, agentConfig, { format: agentConfigPath.format || 'json' })
       setAgentDirty(false)
-    } catch (e: any) { setError(e.message || 'Failed to save') }
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Failed to save') }
     finally { setSaveLoading(false) }
   }
 
@@ -114,18 +123,17 @@ export default function AgentConfigPage(): JSX.Element {
       setAgentConfig(r.data as AgentPluginConfig)
       setExternalChangeDetected(false)
       setAgentDirty(false)
-    } catch (e: any) { setError(e.message || 'Failed to reload') }
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Failed to reload') }
     finally { setLoading(false) }
   }
 
   async function handleOpenExternal(): Promise<void> {
     if (!agentConfigPath?.path) return
     try {
-      const configApi = window.api.config as any
-      const error = await configApi.openExternal(agentConfigPath.path)
+      const error = await window.api.config.openExternal(agentConfigPath.path)
       if (error) setError(`Gagal membuka editor: ${error}`)
-    } catch (e: any) {
-      setError(e.message || 'Gagal membuka file di editor eksternal')
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Gagal membuka file di editor eksternal')
     }
   }
 
@@ -137,15 +145,15 @@ export default function AgentConfigPage(): JSX.Element {
         setAgentConfig(r.data as AgentPluginConfig)
         setAgentDirty(true)
       }
-    } catch (e: any) { setError(e.message || 'Import failed') }
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Import failed') }
   }
 
   async function handleExport(): Promise<void> {
     if (!agentConfig) return
     try {
       const fp = await window.api.dialog.saveFile({ defaultPath: 'oh-my-openagent.json', filters: [{ name: 'JSON', extensions: ['json'] }] })
-      if (fp) await window.api.config.write(fp, agentConfig as any, { format: 'json' })
-    } catch (e: any) { setError(e.message || 'Export failed') }
+      if (fp) await window.api.config.write(fp, agentConfig as Record<string, unknown>, { format: 'json' })
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Export failed') }
   }
 
   function uc(path: string, value: unknown): void {
@@ -190,11 +198,10 @@ export default function AgentConfigPage(): JSX.Element {
   async function handleCreateAgentConfig(): Promise<void> {
     setLoading(true)
     try {
-      const configApi = window.api.config as any
-      const createdPath: string = await configApi.createDefault('agent')
+      const createdPath: string = await window.api.config.createDefault('agent')
       await loadConfig()
-    } catch (e: any) {
-      setError(e.message || 'Gagal membuat agent config')
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Gagal membuat agent config')
     } finally {
       setLoading(false)
     }
@@ -266,12 +273,12 @@ export default function AgentConfigPage(): JSX.Element {
                 <Card key={name} title={name} description={override.model || 'default'} collapsible defaultCollapsed>
                   <div className="space-y-3 pt-2">
                     <TextInput label="Model" value={override.model || ''} onChange={(v) => updateAgent(name, { ...override, model: v })} placeholder="e.g. openai/gpt-4o" />
-                    <SelectInput label="Variant" options={VARIANTS} value={override.variant || 'default'} onChange={(v) => updateAgent(name, { ...override, variant: v as any })} />
+                    <SelectInput label="Variant" options={VARIANTS} value={override.variant || 'default'} onChange={(v) => updateAgent(name, { ...override, variant: v as AgentVariant })} />
                     <TextInput label="Temperature" type="number" value={String(override.temperature ?? '')} onChange={(v) => updateAgent(name, { ...override, temperature: parseFloat(v) || undefined })} placeholder="0.0 - 2.0" />
                     <TextInput label="Top P" type="number" value={String(override.top_p ?? '')} onChange={(v) => updateAgent(name, { ...override, top_p: parseFloat(v) || undefined })} placeholder="0.0 - 1.0" />
                     <TextArea label="Prompt Append" monospace value={override.prompt_append || ''} onChange={(v) => updateAgent(name, { ...override, prompt_append: v })} placeholder="Additional prompt text..." rows={4} />
                     <div className="pt-2 border-t border-border-default">
-                      <Button variant="danger" onClick={() => removeAgentOverride(name)}><Trash2 size={14} /> Remove Override</Button>
+                      <Button variant="danger" onClick={() => setConfirmDeleteAgent(name)}><Trash2 size={14} /> Remove Override</Button>
                     </div>
                   </div>
                 </Card>
@@ -289,7 +296,7 @@ export default function AgentConfigPage(): JSX.Element {
                 <Card key={name} title={name} description={cat.model || 'default'} collapsible defaultCollapsed>
                   <div className="space-y-3 pt-2">
                     <TextInput label="Model" value={cat.model || ''} onChange={(v) => updateCategory(name, { ...cat, model: v })} placeholder="e.g. openai/gpt-4o" />
-                    <SelectInput label="Variant" options={VARIANTS} value={cat.variant || 'default'} onChange={(v) => updateCategory(name, { ...cat, variant: v as any })} />
+                    <SelectInput label="Variant" options={VARIANTS} value={cat.variant || 'default'} onChange={(v) => updateCategory(name, { ...cat, variant: v as AgentVariant })} />
                     <TextInput label="Temperature" type="number" value={String(cat.temperature ?? '')} onChange={(v) => updateCategory(name, { ...cat, temperature: parseFloat(v) || undefined })} placeholder="0.0 - 2.0" />
                     <TextInput label="Top P" type="number" value={String(cat.top_p ?? '')} onChange={(v) => updateCategory(name, { ...cat, top_p: parseFloat(v) || undefined })} placeholder="0.0 - 1.0" />
                   </div>
@@ -364,7 +371,7 @@ export default function AgentConfigPage(): JSX.Element {
                   />
                   <ToggleSwitch label="Disabled" checked={mcp.disabled || false} onChange={(v) => updateMcp(name, { ...mcp, disabled: v })} />
                   <div className="pt-2 border-t border-border-default">
-                    <Button variant="danger" onClick={() => removeMcp(name)}><Trash2 size={14} /> Remove MCP</Button>
+                    <Button variant="danger" onClick={() => setConfirmDeleteMcp(name)}><Trash2 size={14} /> Remove MCP</Button>
                   </div>
                 </div>
               </Card>
@@ -401,6 +408,36 @@ export default function AgentConfigPage(): JSX.Element {
           />
         )}
       </div>
+
+      {/* Confirm Delete Agent Override */}
+      <Modal
+        open={!!confirmDeleteAgent}
+        onClose={() => setConfirmDeleteAgent(null)}
+        title="Remove Agent Override"
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setConfirmDeleteAgent(null)}>Cancel</Button>
+            <Button variant="danger" onClick={() => { if (confirmDeleteAgent) removeAgentOverride(confirmDeleteAgent); setConfirmDeleteAgent(null) }}>Remove</Button>
+          </>
+        }
+      >
+        <p className="text-sm text-themed-secondary">Are you sure you want to remove the override for <strong className="text-themed">{confirmDeleteAgent}</strong>? The agent will revert to default settings.</p>
+      </Modal>
+
+      {/* Confirm Delete MCP */}
+      <Modal
+        open={!!confirmDeleteMcp}
+        onClose={() => setConfirmDeleteMcp(null)}
+        title="Remove MCP Server"
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setConfirmDeleteMcp(null)}>Cancel</Button>
+            <Button variant="danger" onClick={() => { if (confirmDeleteMcp) removeMcp(confirmDeleteMcp); setConfirmDeleteMcp(null) }}>Remove</Button>
+          </>
+        }
+      >
+        <p className="text-sm text-themed-secondary">Are you sure you want to remove MCP server <strong className="text-themed">{confirmDeleteMcp}</strong>?</p>
+      </Modal>
     </div>
   )
 }
