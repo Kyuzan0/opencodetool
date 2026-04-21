@@ -1,5 +1,7 @@
 # OpenCode Manager
 
+by **Anjaymabar**
+
 Desktop management tool untuk konfigurasi [OpenCode](https://opencode.ai). Dibangun dengan Electron + React + TypeScript + Tailwind CSS.
 
 ## Fitur Utama

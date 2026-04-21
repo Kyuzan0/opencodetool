@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Desktop management tool for OpenCode configuration",
   "main": "./out/main/index.js",
-  "author": "OpenCode Manager",
+  "author": "Anjaymabar",
   "license": "MIT",
   "scripts": {
     "dev": "electron-vite dev",
