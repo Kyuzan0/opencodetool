@@ -274,7 +274,7 @@ export default function DashboardPage(): JSX.Element {
                 </div>
                 {configPath && (
                   <p
-                    className="mt-2 truncate text-xs text-themed-secondary font-mono bg-surface/50 rounded-md px-2 py-1 inline-block border border-border-default max-w-full"
+                    className="mt-2 truncate text-xs text-themed-secondary font-mono bg-secondary rounded-md px-2 py-1 inline-block border border-border-default max-w-full"
                     title={configPath.path}
                   >
                     {configPath.path}
@@ -469,7 +469,7 @@ export default function DashboardPage(): JSX.Element {
               )}
             </div>
             {installLog.length > 0 && (
-              <div className="ml-14 max-h-32 overflow-auto rounded-lg bg-primary/80 p-4 font-mono text-[11px] text-themed-secondary border border-border-default shadow-inner">
+              <div className="ml-14 max-h-32 overflow-auto rounded-lg bg-secondary p-4 font-mono text-[11px] text-themed-secondary border border-border-default shadow-inner">
                 {installLog.map((line, i) => (
                   <div key={i} className={`py-0.5 ${line.startsWith('Error') ? 'text-danger font-medium' : ''}`}>
                     {line}
@@ -494,7 +494,7 @@ export default function DashboardPage(): JSX.Element {
                 <h3 className="text-base font-semibold text-themed">Config File Tidak Ditemukan</h3>
                 <p className="mt-1 text-sm text-themed-secondary leading-relaxed max-w-3xl">
                   File{' '}
-                  <code className="rounded-md bg-primary/80 px-1.5 py-0.5 text-[11px] font-mono border border-border-default shadow-sm">
+                  <code className="rounded-md bg-secondary px-1.5 py-0.5 text-[11px] font-mono border border-border-default shadow-sm">
                     opencode.json
                   </code>{' '}
                   tidak ditemukan.
@@ -682,7 +682,7 @@ export default function DashboardPage(): JSX.Element {
 
         {/* Runtime Log */}
         {runtimeLog.length > 0 && (
-          <div className="mt-4 max-h-40 overflow-auto rounded-lg bg-primary/90 p-4 font-mono text-[11px] text-themed-secondary border border-border-default shadow-inner">
+          <div className="mt-4 max-h-40 overflow-auto rounded-lg bg-secondary p-4 font-mono text-[11px] text-themed-secondary border border-border-default shadow-inner">
             {runtimeLog.map((line, idx) => (
               <div key={`${line}-${idx}`} className="py-0.5 whitespace-pre-wrap">
                 {line}
@@ -707,7 +707,7 @@ export default function DashboardPage(): JSX.Element {
             {recentProjects.map((path, index) => (
               <div
                 key={path}
-                className={`flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors ${
+                className={`flex items-center justify-between p-4 hover:bg-white/5 transition-colors ${
                   index !== recentProjects.length - 1 ? 'border-b border-border-default' : ''
                 }`}
               >

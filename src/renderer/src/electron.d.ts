@@ -47,6 +47,7 @@ export interface ElectronAPI {
     write: (filePath: string, content: string) => Promise<void>
     delete: (filePath: string) => Promise<void>
     create: (dir: string, name: string, content: string) => Promise<string>
+    installNpx: (skillName: string, skillDir: string) => Promise<{ stdout: string; stderr: string; exitCode: number }>
   }
   terminal: {
     create: (shellPath: string, cwd?: string) => Promise<string>

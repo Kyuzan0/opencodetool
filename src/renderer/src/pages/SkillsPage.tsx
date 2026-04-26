@@ -275,7 +275,7 @@ export default function SkillsPage(): JSX.Element {
       {activeTab === 'my-skills' ? (
         <div className="flex flex-col md:flex-row gap-4 min-h-[500px]">
         {/* Skill List */}
-        <div className="w-full md:w-64 md:shrink-0 space-y-1 overflow-auto rounded-xl border border-[var(--color-border-subtle)] bg-surface/20 p-2 max-h-64 md:max-h-none">
+        <div className="w-full md:w-64 md:shrink-0 space-y-1 overflow-auto rounded-xl border border-[var(--color-border-subtle)] bg-card p-2 max-h-64 md:max-h-none">
           {skills.length === 0 && (
             <p className="p-4 text-center text-sm text-themed-muted">No skills found</p>
           )}
@@ -290,8 +290,8 @@ export default function SkillsPage(): JSX.Element {
               }}
               className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-colors ${
                 selectedSkill?.name === skill.name
-                  ? 'bg-accent/[0.08] text-accent'
-                  : 'text-themed-secondary hover:bg-surface/40 hover:text-themed'
+                  ? 'bg-skill-accent/[0.08] text-skill-accent'
+                  : 'text-themed-secondary hover:bg-white/5 hover:text-themed'
               }`}
             >
               <GripVertical size={14} className="text-themed-muted shrink-0" />
@@ -380,7 +380,7 @@ export default function SkillsPage(): JSX.Element {
                 {storeSkills.map((skill, i) => (
                   <div 
                     key={skill.id} 
-                    className={`flex flex-col cursor-pointer border border-[var(--color-border-subtle)] bg-surface/20 rounded-xl hover:border-[var(--color-border)] transition-colors animate-stagger-in stagger-${(i % 6) + 1}`}
+                    className={`flex flex-col cursor-pointer border border-[var(--color-border-subtle)] bg-card rounded-xl hover:border-[var(--color-border)] transition-colors animate-stagger-in stagger-${(i % 6) + 1}`}
                     onClick={() => handlePreviewSkill(skill)}
                   >
                     <div className="p-4 flex-1 flex flex-col gap-2">
@@ -389,7 +389,7 @@ export default function SkillsPage(): JSX.Element {
                           {skill.displayName || skill.name}
                         </h3>
                         {skill.verified && (
-                          <Shield size={16} className="text-accent shrink-0" />
+                          <Shield size={16} className="text-skill-accent shrink-0" />
                         )}
                       </div>
                       <p className="text-sm text-themed-muted line-clamp-2 flex-1" title={skill.description}>
@@ -414,13 +414,13 @@ export default function SkillsPage(): JSX.Element {
                       <div className="pt-3 border-t border-[var(--color-border-subtle)] mt-2 flex justify-between items-center">
                         <div className="flex gap-1 flex-wrap">
                           {skill.categories?.slice(0, 2).map(cat => (
-                            <span key={cat} className="text-[10px] bg-surface/40 px-1.5 py-0.5 rounded text-themed-secondary">
+                            <span key={cat} className="text-[10px] bg-secondary px-1.5 py-0.5 rounded text-themed-secondary">
                               {cat}
                             </span>
                           ))}
                         </div>
                         {isSkillInstalled(skill.slug || skill.name) && (
-                          <span className="text-[10px] bg-accent/[0.08] text-accent px-1.5 py-0.5 rounded font-medium">
+                          <span className="text-[10px] bg-skill-accent/[0.08] text-skill-accent px-1.5 py-0.5 rounded font-medium">
                             Installed
                           </span>
                         )}
@@ -483,7 +483,7 @@ export default function SkillsPage(): JSX.Element {
           )}
 
           {githubRepoInfo && !githubInstalled && (
-            <div className="border border-[var(--color-border-subtle)] bg-surface/20 rounded-xl p-5 space-y-4 animate-stagger-in">
+            <div className="border border-[var(--color-border-subtle)] bg-card rounded-xl p-5 space-y-4 animate-stagger-in">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-semibold text-themed flex items-center gap-2">
@@ -516,18 +516,18 @@ export default function SkillsPage(): JSX.Element {
               {githubRepoInfo.topics && githubRepoInfo.topics.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {githubRepoInfo.topics.map(topic => (
-                    <span key={topic} className="px-2 py-1 text-xs rounded-md bg-surface/40 text-themed-secondary">
+                    <span key={topic} className="px-2 py-1 text-xs rounded-md bg-secondary text-themed-secondary">
                       {topic}
                     </span>
                   ))}
                 </div>
               )}
 
-              <div className="bg-surface/40 p-4 rounded-lg">
+              <div className="bg-secondary p-4 rounded-lg">
                 {githubRepoInfo.hasSkillJson && githubRepoInfo.skillJson ? (
                   <div className="space-y-2">
                     <h3 className="text-sm font-medium text-themed flex items-center gap-2">
-                      <FolderGit2 size={16} className="text-accent" />
+                      <FolderGit2 size={16} className="text-skill-accent" />
                       Valid Skill Package Found
                     </h3>
                     <ul className="text-sm text-themed-secondary space-y-1">
@@ -625,11 +625,11 @@ export default function SkillsPage(): JSX.Element {
         <div className="space-y-4">
           {previewSkill && (
             <div className="flex flex-wrap gap-2 text-sm text-themed-secondary mb-2">
-              <a href={previewSkill.gitUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-accent transition-colors">
+              <a href={previewSkill.gitUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-skill-accent transition-colors">
                 <ExternalLink size={14} /> Repository
               </a>
               {previewSkill.categories?.map(cat => (
-                <span key={cat} className="bg-surface/40 px-2 py-0.5 rounded text-xs">{cat}</span>
+                <span key={cat} className="bg-secondary px-2 py-0.5 rounded text-xs">{cat}</span>
               ))}
             </div>
           )}

@@ -31,7 +31,8 @@ const api = {
     read: (filePath: string) => ipcRenderer.invoke('skill:read', filePath),
     write: (filePath: string, content: string) => ipcRenderer.invoke('skill:write', filePath, content),
     delete: (filePath: string) => ipcRenderer.invoke('skill:delete', filePath),
-    create: (dir: string, name: string, content: string) => ipcRenderer.invoke('skill:create', dir, name, content)
+    create: (dir: string, name: string, content: string) => ipcRenderer.invoke('skill:create', dir, name, content),
+    installNpx: (skillName: string, skillDir: string) => ipcRenderer.invoke('skill:install-npx', skillName, skillDir)
   },
   terminal: {
     create: (shellPath: string, cwd?: string) => ipcRenderer.invoke('terminal:create', shellPath, cwd),

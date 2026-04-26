@@ -10,6 +10,8 @@ module.exports = {
         sidebar: { DEFAULT: '#0e0e13', light: '#f0f0f2' },
         card: { DEFAULT: '#1a1a21', light: '#ffffff' },
         accent: { DEFAULT: '#00d4aa', hover: '#00e5bb', muted: '#00d4aa20' },
+        'tab-accent': { DEFAULT: 'var(--color-tab-accent)', hover: 'var(--color-tab-accent-hover)', muted: 'var(--color-tab-accent-muted)' },
+        'skill-accent': { DEFAULT: 'var(--color-skill-accent)', hover: 'var(--color-skill-accent-hover)', muted: 'var(--color-skill-accent-muted)' },
         'border-default': { DEFAULT: '#2c2c38', light: '#e4e4e7' },
         danger: { DEFAULT: '#f43f5e', hover: '#fb7185' },
         success: { DEFAULT: '#10b981', hover: '#34d399' },

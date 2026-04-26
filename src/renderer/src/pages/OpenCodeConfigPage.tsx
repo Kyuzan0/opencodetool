@@ -271,8 +271,8 @@ export default function OpenCodeConfigPage(): JSX.Element {
     <div className="flex flex-col items-center justify-center py-24 gap-4">
       <p className="text-themed-muted opacity-60">File config tidak ditemukan</p>
       <p className="text-xs text-themed-muted opacity-60 max-w-md text-center">
-        Buat file <code className="rounded-md bg-surface/50 px-1.5 py-0.5 font-mono text-accent/80">opencode.json</code> default
-        di <code className="rounded-md bg-surface/50 px-1.5 py-0.5 font-mono text-accent/80">~/.config/opencode/</code> dengan template provider siap pakai.
+        Buat file <code className="rounded-md bg-secondary px-1.5 py-0.5 font-mono text-accent/80">opencode.json</code> default
+        di <code className="rounded-md bg-secondary px-1.5 py-0.5 font-mono text-accent/80">~/.config/opencode/</code> dengan template provider siap pakai.
       </p>
       <div className="flex gap-2">
         <Button onClick={handleCreateConfig}><FilePlus size={16} /> Buat Config Default</Button>

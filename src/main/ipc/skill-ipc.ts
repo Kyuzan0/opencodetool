@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron'
+import { exec } from 'child_process'
 import { listSkills, readSkill, writeSkill, deleteSkill, createSkill } from '../services/skill-service'
 
 function ipcError(channel: string, e: unknown): { error: true; message: string } {
@@ -45,6 +46,30 @@ export function registerSkillIpc(): void {
       return createSkill(dir, name, content)
     } catch (e: unknown) {
       return ipcError('skill:create', e)
+    }
+  })
+
+  ipcMain.handle('skill:install-npx', async (_event, skillName: string, skillDir: string) => {
+    try {
+      // Validate skill name to prevent command injection
+      if (/[;&|`$(){}]/.test(skillName)) {
+        return { stdout: '', stderr: 'Invalid characters in skill name', exitCode: 1 }
+      }
+      return await new Promise<{ stdout: string; stderr: string; exitCode: number }>((resolve) => {
+        exec(
+          `npx skills add ${skillName}`,
+          { cwd: skillDir || undefined, timeout: 60000 },
+          (error, stdout, stderr) => {
+            resolve({
+              stdout: stdout || '',
+              stderr: stderr || '',
+              exitCode: error ? ((error as { code?: number }).code ?? 1) : 0
+            })
+          }
+        )
+      })
+    } catch (e: unknown) {
+      return ipcError('skill:install-npx', e)
     }
   })
 }

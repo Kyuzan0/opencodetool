@@ -38,14 +38,14 @@ export default function Modal({
           <h2 className="text-base font-semibold text-themed tracking-tight">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-themed-muted hover:text-themed-secondary hover:bg-white/[0.04] transition-all"
+            className="rounded-lg p-1.5 text-themed-muted hover:text-themed-secondary hover:bg-white/5 transition-all"
           >
             <X size={18} />
           </button>
         </div>
         <div className="px-6 py-5 text-sm text-themed-secondary overflow-y-auto flex-1 min-h-0">{children}</div>
         {actions && (
-          <div className="flex justify-end gap-2 px-6 py-4 border-t border-border-default bg-surface/50 shrink-0">
+          <div className="flex justify-end gap-2 px-6 py-4 border-t border-border-default bg-secondary shrink-0">
             {actions}
           </div>
         )}

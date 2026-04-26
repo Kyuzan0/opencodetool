@@ -43,7 +43,7 @@ export default function Sidebar(): JSX.Element {
         <button
           onClick={toggleSidebar}
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="rounded-lg p-1.5 text-themed-muted hover:bg-white/[0.04] hover:text-themed transition-all"
+          className="rounded-lg p-1.5 text-themed-muted hover:bg-white/5 hover:text-themed transition-all"
         >
           {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
@@ -63,7 +63,7 @@ export default function Sidebar(): JSX.Element {
               className={`group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-200 ${
                 isActive
                   ? 'bg-accent/[0.08] text-accent'
-                  : 'text-themed-muted hover:bg-white/[0.03] hover:text-themed-secondary'
+                  : 'text-themed-muted hover:bg-white/5 hover:text-themed-secondary'
               }`}
               title={sidebarCollapsed ? item.label : undefined}
             >

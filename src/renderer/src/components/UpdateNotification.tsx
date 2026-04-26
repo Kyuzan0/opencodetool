@@ -67,7 +67,7 @@ export default function UpdateNotification(): JSX.Element | null {
             <Button variant="primary" onClick={() => { setShowModal(true) }} className="text-xs px-3 py-1.5">
               View
             </Button>
-            <button onClick={dismiss} className="rounded-lg p-1 text-themed-muted hover:text-themed-secondary transition-all">
+            <button onClick={reset} className="rounded-lg p-1 text-themed-muted hover:text-themed-secondary transition-all">
               <X size={14} />
             </button>
           </div>
