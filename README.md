@@ -27,6 +27,21 @@ Desktop management tool untuk konfigurasi [OpenCode](https://opencode.ai). Diban
 | Language | TypeScript 5 |
 | Icons | Lucide React |
 
+## Download
+
+<p align="center">
+  <a href="https://github.com/Kyuzan0/opencodetool/releases/latest">
+    <img src="https://img.shields.io/github/v/release/Kyuzan0/opencodetool?style=for-the-badge&label=Download%20Latest&color=0ea5e9" alt="Latest Release" />
+  </a>
+</p>
+
+| File | Deskripsi |
+|------|-----------|
+| [OpenCode Manager Setup 1.1.0.exe](https://github.com/Kyuzan0/opencodetool/releases/download/v1.1.0/OpenCode.Manager.Setup.1.1.0.exe) | Installer NSIS (recommended) |
+| [OpenCode Manager 1.1.0.exe](https://github.com/Kyuzan0/opencodetool/releases/download/v1.1.0/OpenCode.Manager.1.1.0.exe) | Portable (tanpa install) |
+
+> Lihat semua versi di [Releases](https://github.com/Kyuzan0/opencodetool/releases).
+
 ## Prerequisites
 
 - **Node.js** >= 18
