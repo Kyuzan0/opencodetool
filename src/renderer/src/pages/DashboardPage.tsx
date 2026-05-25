@@ -244,37 +244,35 @@ export default function DashboardPage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-10 max-w-6xl">
+    <div className="space-y-6">
       {/* Page Header */}
-      <div className="animate-stagger-in stagger-1">
-        <h1 className="text-2xl font-bold text-themed tracking-tight">Dashboard</h1>
-        <p className="mt-1 text-sm text-themed-muted">System overview and runtime controls</p>
+      <div>
+        <h1 className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">Dashboard</h1>
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">System overview and runtime controls</p>
       </div>
 
       {/* Status Cards Grid */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        {/* HERO KPIs */}
-        <div className="lg:col-span-12 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {/* Config Status */}
-          <div className="card card-accent-left animate-stagger-in stagger-1 relative overflow-hidden group">
+          <div className="card card-accent-left relative overflow-hidden group xl:col-span-2">
             <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-accent opacity-5 blur-2xl group-hover:opacity-10 transition-opacity"></div>
             <div className="flex items-start gap-4 relative z-10">
               <div className="rounded-xl bg-accent/[0.12] p-3 shadow-inner">
                 <FileJson size={24} className="text-accent" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-themed-muted mb-1">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-1">
                   Config Status
                 </p>
                 <div className="flex items-center gap-2">
                   <span className={`status-dot ${configPath?.exists ? 'status-dot-active' : 'status-dot-inactive'}`} />
-                  <span className="text-xl font-bold text-themed tracking-tight">
+                  <span className="text-xl font-bold text-[var(--color-text-primary)] tracking-tight">
                     {configPath?.exists ? 'Loaded' : 'Not Loaded'}
                   </span>
                 </div>
                 {configPath && (
                   <p
-                    className="mt-2 truncate text-xs text-themed-secondary font-mono bg-secondary rounded-md px-2 py-1 inline-block border border-border-default max-w-full"
+                    className="mt-2 truncate text-xs text-[var(--color-text-secondary)] font-mono bg-secondary rounded-md px-2 py-1 inline-block border border-border-default max-w-full"
                     title={configPath.path}
                   >
                     {configPath.path}
@@ -285,26 +283,26 @@ export default function DashboardPage(): JSX.Element {
           </div>
 
           {/* OpenCode CLI */}
-          <div className="card card-accent-left card-accent-success animate-stagger-in stagger-2 relative overflow-hidden group">
+          <div className="card card-accent-left card-accent-success relative overflow-hidden group xl:col-span-2">
             <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-success opacity-5 blur-2xl group-hover:opacity-10 transition-opacity"></div>
             <div className="flex items-start gap-4 relative z-10">
               <div className="rounded-xl bg-success/[0.12] p-3 shadow-inner">
                 <Terminal size={24} className="text-success" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-themed-muted mb-1">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-1">
                   OpenCode CLI
                 </p>
                 <div className="flex items-center gap-2">
                   {ocStatus === null ? (
                     <>
                       <span className="status-dot status-dot-warning animate-pulse" />
-                      <span className="text-xl font-bold text-themed-muted tracking-tight">Detecting...</span>
+                      <span className="text-xl font-bold text-[var(--color-text-muted)] tracking-tight">Detecting...</span>
                     </>
                   ) : ocStatus.found ? (
                     <>
                       <span className="status-dot status-dot-active" />
-                      <span className="text-xl font-bold text-themed tracking-tight">v{ocStatus.version}</span>
+                      <span className="text-xl font-bold text-[var(--color-text-primary)] tracking-tight">v{ocStatus.version}</span>
                       <span className="badge badge-success ml-2">Installed</span>
                     </>
                   ) : (
@@ -315,28 +313,25 @@ export default function DashboardPage(): JSX.Element {
                   )}
                 </div>
                 {ocStatus?.found && (
-                  <p className="mt-2 text-xs text-themed-secondary font-medium">Ready to execute commands</p>
+                  <p className="mt-2 text-xs text-[var(--color-text-secondary)] font-medium">Ready to execute commands</p>
                 )}
               </div>
             </div>
           </div>
-        </div>
-
-        {/* SECONDARY INFO */}
-        <div className="lg:col-span-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* SECONDARY INFO - Merged into the main grid */}
           {/* Active Plugins */}
-          <div className="card animate-stagger-in stagger-3">
+          <div className="card">
             <div className="flex items-start gap-3">
               <div className="rounded-lg bg-[#818cf8]/[0.15] p-2">
                 <Puzzle size={16} className="text-[#818cf8]" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-themed-muted">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
                   Active Plugins
                 </p>
                 <div className="flex items-baseline gap-1 mt-0.5">
-                  <span className="text-lg font-bold text-themed tabular-nums">{plugins.length}</span>
-                  <span className="text-[10px] text-themed-muted">loaded</span>
+                  <span className="text-lg font-bold text-[var(--color-text-primary)] tabular-nums">{plugins.length}</span>
+                  <span className="text-[10px] text-[var(--color-text-muted)]">loaded</span>
                 </div>
               </div>
             </div>
@@ -346,18 +341,18 @@ export default function DashboardPage(): JSX.Element {
           </div>
 
           {/* Registered Skills */}
-          <div className="card animate-stagger-in stagger-4">
+          <div className="card">
             <div className="flex items-start gap-3">
               <div className="rounded-lg bg-warning/[0.15] p-2">
                 <Wand2 size={16} className="text-warning" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-themed-muted">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
                   Registered Skills
                 </p>
                 <div className="flex items-baseline gap-1 mt-0.5">
-                  <span className="text-lg font-bold text-themed tabular-nums">{skills.length}</span>
-                  <span className="text-[10px] text-themed-muted">available</span>
+                  <span className="text-lg font-bold text-[var(--color-text-primary)] tabular-nums">{skills.length}</span>
+                  <span className="text-[10px] text-[var(--color-text-muted)]">available</span>
                 </div>
               </div>
             </div>
@@ -367,18 +362,18 @@ export default function DashboardPage(): JSX.Element {
           </div>
 
           {/* OpenCode App */}
-          <div className="card animate-stagger-in stagger-5">
+          <div className="card">
             <div className="flex items-start gap-3">
               <div className="rounded-lg bg-accent/[0.15] p-2">
                 <Monitor size={16} className="text-accent" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-themed-muted">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
                   Desktop App
                 </p>
                 <div className="mt-1 flex items-center">
                   {ocAppStatus === null ? (
-                    <span className="text-sm font-medium text-themed-muted">Detecting...</span>
+                    <span className="text-sm font-medium text-[var(--color-text-muted)]">Detecting...</span>
                   ) : ocAppStatus.found ? (
                     <span className="badge badge-success">
                       {ocAppStatus.version ? `v${ocAppStatus.version}` : 'Installed'}
@@ -395,16 +390,16 @@ export default function DashboardPage(): JSX.Element {
           </div>
 
           {/* Package Manager */}
-          <div className="card animate-stagger-in stagger-6">
+          <div className="card">
             <div className="flex items-start gap-3">
               <div className="rounded-lg bg-accent/[0.15] p-2">
                 <Package size={16} className="text-accent" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-themed-muted">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
                   Package Manager
                 </p>
-                <div className="mt-1 text-sm font-semibold text-themed">
+                <div className="mt-1 text-sm font-semibold text-[var(--color-text-primary)]">
                   {pmInfo ? `${pmInfo.preferred} v${pmInfo.version}` : 'Detecting...'}
                 </div>
               </div>
@@ -414,11 +409,10 @@ export default function DashboardPage(): JSX.Element {
             )}
           </div>
         </div>
-      </div>
 
       {/* Install OpenCode Warning */}
       {ocStatus && !ocStatus.found && (
-        <div className="animate-slide-up card card-accent-left card-accent-warning p-5">
+        <div className="card card-accent-left card-accent-warning p-5">
           <div className="absolute top-0 right-0 -mt-8 -mr-8 h-32 w-32 rounded-full bg-warning opacity-5 blur-2xl pointer-events-none"></div>
           <div className="space-y-4 relative z-10">
             <div className="flex items-start gap-4">
@@ -426,8 +420,8 @@ export default function DashboardPage(): JSX.Element {
                 <AlertCircle size={20} className="text-warning shrink-0" />
               </div>
               <div className="flex-1">
-                <h3 className="text-base font-semibold text-themed">OpenCode CLI Not Detected</h3>
-                <p className="mt-1 text-sm text-themed-secondary leading-relaxed max-w-3xl">
+                <h3 className="text-base font-semibold text-[var(--color-text-primary)]">OpenCode CLI Not Detected</h3>
+                <p className="mt-1 text-sm text-[var(--color-text-secondary)] leading-relaxed max-w-3xl">
                   OpenCode CLI tidak ditemukan di PATH sistem.
                   {ocAppStatus?.found
                     ? ' Desktop App terdeteksi tapi CLI-nya tidak tersedia di PATH.'
@@ -469,7 +463,7 @@ export default function DashboardPage(): JSX.Element {
               )}
             </div>
             {installLog.length > 0 && (
-              <div className="ml-14 max-h-32 overflow-auto rounded-lg bg-secondary p-4 font-mono text-[11px] text-themed-secondary border border-border-default shadow-inner">
+              <div className="ml-14 max-h-32 overflow-auto rounded-lg bg-secondary p-4 font-mono text-[11px] text-[var(--color-text-secondary)] border border-border-default shadow-inner">
                 {installLog.map((line, i) => (
                   <div key={i} className={`py-0.5 ${line.startsWith('Error') ? 'text-danger font-medium' : ''}`}>
                     {line}
@@ -483,7 +477,7 @@ export default function DashboardPage(): JSX.Element {
 
       {/* Config Not Found Warning */}
       {!configPath && (
-        <div className="animate-slide-up card card-accent-left card-accent-warning p-5">
+        <div className="card card-accent-left card-accent-warning p-5">
           <div className="absolute top-0 right-0 -mt-8 -mr-8 h-32 w-32 rounded-full bg-warning opacity-5 blur-2xl pointer-events-none"></div>
           <div className="space-y-4 relative z-10">
             <div className="flex items-start gap-4">
@@ -491,8 +485,8 @@ export default function DashboardPage(): JSX.Element {
                 <AlertCircle size={20} className="text-warning shrink-0" />
               </div>
               <div className="flex-1">
-                <h3 className="text-base font-semibold text-themed">Config File Tidak Ditemukan</h3>
-                <p className="mt-1 text-sm text-themed-secondary leading-relaxed max-w-3xl">
+                <h3 className="text-base font-semibold text-[var(--color-text-primary)]">Config File Tidak Ditemukan</h3>
+                <p className="mt-1 text-sm text-[var(--color-text-secondary)] leading-relaxed max-w-3xl">
                   File{' '}
                   <code className="rounded-md bg-secondary px-1.5 py-0.5 text-[11px] font-mono border border-border-default shadow-sm">
                     opencode.json
@@ -515,9 +509,9 @@ export default function DashboardPage(): JSX.Element {
       )}
 
       {/* Quick Actions */}
-      <div className="animate-stagger-in stagger-3">
-        <h2 className="mb-4 text-sm font-bold text-themed uppercase tracking-widest text-themed-muted">Quick Actions</h2>
-        <div className="flex flex-wrap gap-3">
+      <div>
+        <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[var(--color-text-muted)]">Quick Actions</h2>
+        <div className="flex flex-wrap gap-2">
           <Button variant="primary" onClick={() => navigate('/opencode-config')}>
             <FileJson size={15} /> Open Config
           </Button>
@@ -542,24 +536,24 @@ export default function DashboardPage(): JSX.Element {
       </div>
 
       {/* Runtime Control */}
-      <div className="animate-stagger-in stagger-4">
-        <div className="mb-4">
-          <h2 className="text-sm font-bold text-themed tracking-tight uppercase tracking-widest text-themed-muted">
+      <div>
+        <div className="mb-3">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
             OpenCode Runtime
           </h2>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* CLI Control */}
-          <div className="card !p-5">
+          <div className="card !p-4">
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="rounded-lg bg-surface p-2 shadow-sm border border-border-default">
                   <Terminal size={18} className="text-accent" />
                 </div>
                 <div>
-                  <span className="text-sm font-bold text-themed block">OpenCode CLI</span>
-                  <span className="text-[11px] text-themed-muted font-medium">Background Process</span>
+                  <span className="text-sm font-bold text-[var(--color-text-primary)] block">OpenCode CLI</span>
+                  <span className="text-[11px] text-[var(--color-text-muted)] font-medium">Background Process</span>
                 </div>
               </div>
               <div className="flex items-center">
@@ -567,7 +561,7 @@ export default function DashboardPage(): JSX.Element {
                   className={`badge ${runtimeStatus?.cli.running ? 'badge-success' : 'badge-muted'}`}
                 >
                   <span
-                    className={`status-dot ${runtimeStatus?.cli.running ? 'status-dot-active' : 'bg-themed-muted shadow-none'}`}
+                    className={`status-dot ${runtimeStatus?.cli.running ? 'status-dot-active' : 'bg-[var(--color-text-muted)] shadow-none'}`}
                   />
                   {runtimeStatus?.cli.running
                     ? `Running (PID ${runtimeStatus.cli.pid ?? '-'})`
@@ -604,15 +598,15 @@ export default function DashboardPage(): JSX.Element {
           </div>
 
           {/* Web Control */}
-          <div className="card !p-5">
+          <div className="card !p-4">
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="rounded-lg bg-surface p-2 shadow-sm border border-border-default">
                   <Globe size={18} className="text-accent" />
                 </div>
                 <div>
-                  <span className="text-sm font-bold text-themed block">OpenCode Web</span>
-                  <span className="text-[11px] text-themed-muted font-medium">Browser Interface</span>
+                  <span className="text-sm font-bold text-[var(--color-text-primary)] block">OpenCode Web</span>
+                  <span className="text-[11px] text-[var(--color-text-muted)] font-medium">Browser Interface</span>
                 </div>
               </div>
               <div className="flex items-center">
@@ -620,7 +614,7 @@ export default function DashboardPage(): JSX.Element {
                   className={`badge ${runtimeStatus?.web.running ? 'badge-success' : 'badge-muted'}`}
                 >
                   <span
-                    className={`status-dot ${runtimeStatus?.web.running ? 'status-dot-active' : 'bg-themed-muted shadow-none'}`}
+                    className={`status-dot ${runtimeStatus?.web.running ? 'status-dot-active' : 'bg-[var(--color-text-muted)] shadow-none'}`}
                   />
                   {runtimeStatus?.web.running
                     ? `Running (Port ${runtimeStatus.web.port ?? '-'})`
@@ -682,7 +676,7 @@ export default function DashboardPage(): JSX.Element {
 
         {/* Runtime Log */}
         {runtimeLog.length > 0 && (
-          <div className="mt-4 max-h-40 overflow-auto rounded-lg bg-secondary p-4 font-mono text-[11px] text-themed-secondary border border-border-default shadow-inner">
+          <div className="mt-4 max-h-40 overflow-auto rounded-lg bg-secondary p-4 font-mono text-[11px] text-[var(--color-text-secondary)] border border-border-default shadow-inner">
             {runtimeLog.map((line, idx) => (
               <div key={`${line}-${idx}`} className="py-0.5 whitespace-pre-wrap">
                 {line}
@@ -699,8 +693,8 @@ export default function DashboardPage(): JSX.Element {
 
       {/* Recent Projects */}
       {recentProjects.length > 0 && (
-        <div className="animate-stagger-in stagger-5">
-          <h2 className="mb-4 text-sm font-bold text-themed uppercase tracking-widest text-themed-muted">
+        <div>
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
             Recent Projects
           </h2>
           <div className="card !p-0 overflow-hidden">
@@ -713,9 +707,9 @@ export default function DashboardPage(): JSX.Element {
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="rounded-md bg-surface p-1.5 border border-border-default">
-                    <FolderOpen size={14} className="text-themed-secondary shrink-0" />
+                    <FolderOpen size={14} className="text-[var(--color-text-secondary)] shrink-0" />
                   </div>
-                  <span className="truncate text-sm text-themed-secondary font-mono">
+                  <span className="truncate text-sm text-[var(--color-text-secondary)] font-mono">
                     {path}
                   </span>
                 </div>

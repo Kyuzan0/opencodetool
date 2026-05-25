@@ -6,6 +6,7 @@ import {
   Bot,
   Puzzle,
   Wand2,
+  Server,
   Settings,
   ChevronLeft,
   ChevronRight
@@ -17,6 +18,7 @@ const navItems = [
   { path: '/agent-config', label: 'Agent Config', icon: Bot },
   { path: '/plugins', label: 'Plugins', icon: Puzzle },
   { path: '/skills', label: 'Skills', icon: Wand2 },
+  { path: '/mcp', label: 'MCP Servers', icon: Server },
   { path: '/settings', label: 'Settings', icon: Settings }
 ]
 

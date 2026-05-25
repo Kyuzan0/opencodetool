@@ -93,6 +93,16 @@ const api = {
     install: (skillDir: string, name: string, gitUrl: string) =>
       ipcRenderer.invoke('smithery:install', skillDir, name, gitUrl)
   },
+  mcp: {
+    trending: () => ipcRenderer.invoke('mcp:trending'),
+    installed: (configPath: string) => ipcRenderer.invoke('mcp:installed', configPath),
+    install: (configPath: string, name: string, command: string, args: string[], env?: Record<string, string>) =>
+      ipcRenderer.invoke('mcp:install', configPath, name, command, args, env),
+    uninstall: (configPath: string, name: string) => ipcRenderer.invoke('mcp:uninstall', configPath, name),
+    toggle: (configPath: string, name: string, disabled: boolean) => ipcRenderer.invoke('mcp:toggle', configPath, name, disabled),
+    pluginInstalled: (pluginConfigPath: string) => ipcRenderer.invoke('mcp:plugin-installed', pluginConfigPath),
+    pluginToggle: (pluginConfigPath: string, name: string, disabled: boolean) => ipcRenderer.invoke('mcp:plugin-toggle', pluginConfigPath, name, disabled)
+  },
   fileWatcher: {
     watch: (filePath: string) => ipcRenderer.invoke('file-watcher:watch', filePath),
     unwatch: (filePath: string) => ipcRenderer.invoke('file-watcher:unwatch', filePath),
@@ -125,6 +135,6 @@ if (process.contextIsolated) {
     console.error(error)
   }
 } else {
-  ;(window as Record<string, unknown>).electron = electronAPI
-  ;(window as Record<string, unknown>).api = api
+  ;(globalThis as Record<string, unknown>).electron = electronAPI
+  ;(globalThis as Record<string, unknown>).api = api
 }

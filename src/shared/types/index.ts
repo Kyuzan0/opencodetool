@@ -71,3 +71,10 @@ export type {
   UpdateDownloadResult,
   UpdateInstallResult
 } from './update-types'
+
+export type {
+  TrendingMcp,
+  McpInstallRequest,
+  McpInstallResult,
+  McpListEntry
+} from './mcp-types'

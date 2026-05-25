@@ -7,6 +7,7 @@ import AgentConfigPage from './pages/AgentConfigPage'
 import PluginsPage from './pages/PluginsPage'
 import SkillsPage from './pages/SkillsPage'
 import SettingsPage from './pages/SettingsPage'
+import McpPage from './pages/McpPage'
 import { useSettingsStore, useUiStore } from './stores'
 import { applyTheme } from './lib/theme'
 import { ToastContainer } from './components/ui/Toast'
@@ -52,6 +53,7 @@ function AppShell(): JSX.Element {
           <Route path="/agent-config" element={<AgentConfigPage />} />
           <Route path="/plugins" element={<PluginsPage />} />
           <Route path="/skills" element={<SkillsPage />} />
+          <Route path="/mcp" element={<McpPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>

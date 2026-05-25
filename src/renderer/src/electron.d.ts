@@ -1,4 +1,4 @@
-import type { SmitherySkill, GitHubRepoInfo, GitHubSkillInstallResult, ShellInfo, UpdateCheckResult, UpdateDownloadResult, UpdateDownloadProgress, UpdateInstallResult } from '../../shared/types'
+import type { SmitherySkill, GitHubRepoInfo, GitHubSkillInstallResult, ShellInfo, UpdateCheckResult, UpdateDownloadResult, UpdateDownloadProgress, UpdateInstallResult, TrendingMcp, McpInstallResult, McpListEntry } from '../../shared/types'
 
 /**
  * Typed window.api interface matching preload/index.ts exactly.
@@ -104,6 +104,15 @@ export interface ElectronAPI {
     get: (namespace: string, slug: string) => Promise<SmitherySkill>
     fetchContent: (gitUrl: string) => Promise<string>
     install: (skillDir: string, name: string, gitUrl: string) => Promise<{ filePath: string; content: string }>
+  }
+  mcp: {
+    trending: () => Promise<TrendingMcp[]>
+    installed: (configPath: string) => Promise<McpListEntry[]>
+    install: (configPath: string, name: string, command: string, args: string[], env?: Record<string, string>) => Promise<McpInstallResult>
+    uninstall: (configPath: string, name: string) => Promise<McpInstallResult>
+    toggle: (configPath: string, name: string, disabled: boolean) => Promise<McpInstallResult>
+    pluginInstalled: (pluginConfigPath: string) => Promise<McpListEntry[]>
+    pluginToggle: (pluginConfigPath: string, name: string, disabled: boolean) => Promise<McpInstallResult>
   }
   fileWatcher: {
     watch: (filePath: string) => Promise<void>
