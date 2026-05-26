@@ -8,6 +8,8 @@ import PluginsPage from './pages/PluginsPage'
 import SkillsPage from './pages/SkillsPage'
 import SettingsPage from './pages/SettingsPage'
 import McpPage from './pages/McpPage'
+import DiagnosticsPage from './pages/DiagnosticsPage'
+import LogViewerPage from './pages/LogViewerPage'
 import { useSettingsStore, useUiStore } from './stores'
 import { applyTheme } from './lib/theme'
 import { ToastContainer } from './components/ui/Toast'
@@ -54,6 +56,8 @@ function AppShell(): JSX.Element {
           <Route path="/plugins" element={<PluginsPage />} />
           <Route path="/skills" element={<SkillsPage />} />
           <Route path="/mcp" element={<McpPage />} />
+          <Route path="/diagnostics" element={<DiagnosticsPage />} />
+          <Route path="/logs" element={<LogViewerPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>

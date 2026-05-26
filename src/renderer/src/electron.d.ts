@@ -33,8 +33,8 @@ export interface ElectronAPI {
     install: (pluginName: string, configDir: string) => Promise<{ stdout: string; stderr: string; exitCode: number }>
     uninstall: (pluginName: string, configDir: string) => Promise<{ stdout: string; stderr: string; exitCode: number }>
     list: (configDir: string) => Promise<{ stdout: string; stderr: string; exitCode: number }>
-    detectOpenCode: () => Promise<{ installed: boolean; version?: string; path?: string }>
-    detectOpenCodeApp: () => Promise<{ installed: boolean; path?: string }>
+    detectOpenCode: (customPath?: string) => Promise<{ found: boolean; version?: string; path?: string }>
+    detectOpenCodeApp: () => Promise<{ found: boolean; installPath?: string; appExe?: string; cliExe?: string; version?: string }>
     installOpenCode: (pm: 'npm' | 'bun') => Promise<{ stdout: string; stderr: string; exitCode: number }>
   }
   shell: {

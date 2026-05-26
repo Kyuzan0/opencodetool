@@ -14,6 +14,10 @@ import { registerSmitheryIpc } from './ipc/smithery-ipc'
 import { registerGitHubSkillIpc } from './ipc/github-skill-ipc'
 import { registerUpdateIpc } from './ipc/update-ipc'
 import { registerMcpIpc } from './ipc/mcp-ipc'
+import { registerDiagnosticsIpc } from './ipc/diagnostics-ipc'
+import { registerLogViewerIpc } from './ipc/log-viewer-ipc'
+import { registerTemplateIpc } from './ipc/template-ipc'
+import { registerBundleIpc } from './ipc/bundle-ipc'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -135,6 +139,10 @@ app.whenReady().then(() => {
   registerGitHubSkillIpc()
   registerUpdateIpc()
   registerMcpIpc()
+  registerDiagnosticsIpc()
+  registerLogViewerIpc()
+  registerTemplateIpc()
+  registerBundleIpc()
 
   // Create menu
   createMenu()

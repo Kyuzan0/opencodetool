@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useConfigStore, useMcpStore, useUiStore } from '../stores'
 import { Card, TextInput, Button, Modal, ToggleSwitch } from '../components/ui'
-import { Plus, Trash2, Download, Server, CheckCircle, AlertCircle, Search, Zap, Puzzle } from 'lucide-react'
+import { Plus, Trash2, Download, Server, CheckCircle, AlertCircle, Search, Zap, Puzzle, Activity } from 'lucide-react'
 import type { TrendingMcp } from '@shared/types'
 
 export default function McpPage(): JSX.Element {
@@ -15,6 +15,8 @@ export default function McpPage(): JSX.Element {
   const [customCommand, setCustomCommand] = useState('npx')
   const [customArgs, setCustomArgs] = useState('')
   const [customEnv, setCustomEnv] = useState('')
+  const [healthResults, setHealthResults] = useState<Record<string, { status: string; responseTimeMs: number | null; error: string | null }>>({})
+  const [healthChecking, setHealthChecking] = useState(false)
 
   const configPath = openCodeConfigPath?.path || ''
   const pluginConfigPath = agentConfigPath?.path || ''
@@ -197,6 +199,13 @@ export default function McpPage(): JSX.Element {
             {installed.map((m) => (
               <div key={m.name} className="flex items-center justify-between rounded-lg border border-[var(--color-border-subtle)] px-4 py-3 hover:border-[var(--color-border-bright)] transition-colors">
                 <div className="flex items-center gap-3">
+                  {healthResults[m.name] ? (
+                    <span className={`w-2 h-2 rounded-full ${
+                      healthResults[m.name].status === 'healthy' ? 'bg-success shadow-[0_0_4px_rgba(34,197,94,0.5)]' :
+                      healthResults[m.name].status === 'unhealthy' ? 'bg-danger shadow-[0_0_4px_rgba(244,63,94,0.5)]' :
+                      'bg-[var(--color-text-muted)]'
+                    }`} title={healthResults[m.name].error || healthResults[m.name].status} />
+                  ) : null}
                   <Server size={18} className="text-accent" />
                   <div>
                     <span className="text-[13px] font-medium text-themed">{m.name}</span>
@@ -217,9 +226,24 @@ export default function McpPage(): JSX.Element {
             ))}
           </div>
         )}
-        <div className="mt-3">
+        <div className="mt-3 flex gap-2">
           <Button variant="secondary" onClick={() => setShowCustomModal(true)} disabled={isInstalling || !configPath}>
             <Plus size={16} /> Add Custom MCP
+          </Button>
+          <Button variant="secondary" onClick={async () => {
+            if (!configPath) return
+            setHealthChecking(true)
+            try {
+              const results = await (window as any).api.mcp.healthCheck(configPath)
+              const map: Record<string, { status: string; responseTimeMs: number | null; error: string | null }> = {}
+              for (const r of results) {
+                map[r.name] = { status: r.status, responseTimeMs: r.responseTimeMs, error: r.error }
+              }
+              setHealthResults(map)
+            } catch { /* ignore */ }
+            finally { setHealthChecking(false) }
+          }} loading={healthChecking} disabled={installed.length === 0 || !configPath}>
+            <Activity size={16} /> Health Check
           </Button>
         </div>
       </Card>

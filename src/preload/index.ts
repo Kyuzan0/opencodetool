@@ -18,7 +18,7 @@ const api = {
     install: (pluginName: string, configDir: string) => ipcRenderer.invoke('pm:install', pluginName, configDir),
     uninstall: (pluginName: string, configDir: string) => ipcRenderer.invoke('pm:uninstall', pluginName, configDir),
     list: (configDir: string) => ipcRenderer.invoke('pm:list', configDir),
-    detectOpenCode: () => ipcRenderer.invoke('pm:detect-opencode'),
+    detectOpenCode: (customPath?: string) => ipcRenderer.invoke('pm:detect-opencode', customPath),
     detectOpenCodeApp: () => ipcRenderer.invoke('pm:detect-opencode-app'),
     installOpenCode: (pm: 'npm' | 'bun') => ipcRenderer.invoke('pm:install-opencode', pm)
   },
@@ -101,7 +101,8 @@ const api = {
     uninstall: (configPath: string, name: string) => ipcRenderer.invoke('mcp:uninstall', configPath, name),
     toggle: (configPath: string, name: string, disabled: boolean) => ipcRenderer.invoke('mcp:toggle', configPath, name, disabled),
     pluginInstalled: (pluginConfigPath: string) => ipcRenderer.invoke('mcp:plugin-installed', pluginConfigPath),
-    pluginToggle: (pluginConfigPath: string, name: string, disabled: boolean) => ipcRenderer.invoke('mcp:plugin-toggle', pluginConfigPath, name, disabled)
+    pluginToggle: (pluginConfigPath: string, name: string, disabled: boolean) => ipcRenderer.invoke('mcp:plugin-toggle', pluginConfigPath, name, disabled),
+    healthCheck: (configPath: string) => ipcRenderer.invoke('mcp:health-check', configPath)
   },
   fileWatcher: {
     watch: (filePath: string) => ipcRenderer.invoke('file-watcher:watch', filePath),
@@ -124,6 +125,23 @@ const api = {
     removeListeners: () => {
       ipcRenderer.removeAllListeners('update:download-progress')
     }
+  },
+  diagnostics: {
+    run: (customOpenCodePath?: string) => ipcRenderer.invoke('diagnostics:run', customOpenCodePath)
+  },
+  logs: {
+    sessions: (limit?: number) => ipcRenderer.invoke('logs:sessions', limit),
+    read: (sessionPath: string) => ipcRenderer.invoke('logs:read', sessionPath)
+  },
+  template: {
+    list: () => ipcRenderer.invoke('template:list'),
+    apply: (templateId: string, configPath: string, agentConfigPath?: string) =>
+      ipcRenderer.invoke('template:apply', templateId, configPath, agentConfigPath)
+  },
+  bundle: {
+    export: (options: Record<string, unknown>) => ipcRenderer.invoke('bundle:export', options),
+    import: (zipPath: string, targetDir?: string) => ipcRenderer.invoke('bundle:import', zipPath, targetDir),
+    preview: (zipPath: string) => ipcRenderer.invoke('bundle:preview', zipPath)
   }
 }
 

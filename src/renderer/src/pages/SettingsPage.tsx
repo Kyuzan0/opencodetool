@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSettingsStore, useConfigStore, usePluginStore, useSkillStore, useUpdateStore } from '../stores'
 import { Card, TextInput, SelectInput, ToggleSwitch, Button, Modal } from '../components/ui'
-import { Moon, Sun, FolderOpen, ExternalLink, Trash2, AlertTriangle, CheckCircle, Database, FolderX, Monitor, RefreshCw } from 'lucide-react'
+import { Moon, Sun, FolderOpen, ExternalLink, Trash2, AlertTriangle, CheckCircle, Database, FolderX, Monitor, RefreshCw, Download, Upload, FileJson, Layers } from 'lucide-react'
 import type { ShellInfo } from '@shared/types'
 
 interface UninstallTargets {
@@ -27,8 +27,8 @@ interface UninstallOptions {
 
 export default function SettingsPage(): JSX.Element {
   const {
-    theme, language, defaultConfigPath, preferredShell, bunPath, autoBackup,
-    setTheme, setLanguage, setDefaultPath, setPreferredShell, setBunPath, setAutoBackup
+    theme, language, defaultConfigPath, preferredShell, bunPath, autoBackup, customOpenCodePath,
+    setTheme, setLanguage, setDefaultPath, setPreferredShell, setBunPath, setAutoBackup, setCustomOpenCodePath
   } = useSettingsStore()
   const [shells, setShells] = useState<ShellInfo[]>([])
   const [showUninstallModal, setShowUninstallModal] = useState(false)
@@ -181,6 +181,10 @@ export default function SettingsPage(): JSX.Element {
             <Button variant="secondary" onClick={async () => { const d = await window.api.dialog.openDirectory(); if (d) setDefaultPath(d) }}><FolderOpen size={16} /> Browse</Button>
           </div>
           <div className="flex items-end gap-2">
+            <TextInput label="OpenCode CLI Path" description="Custom path to opencode executable (leave empty for auto-detection via PATH/Registry)" value={customOpenCodePath} onChange={setCustomOpenCodePath} placeholder="e.g. D:\Tools\opencode\opencode.exe" className="flex-1" />
+            <Button variant="secondary" onClick={async () => { const f = await window.api.dialog.openFile({ filters: [{ name: 'Executable', extensions: ['exe', 'cmd', 'bat'] }] }); if (f) setCustomOpenCodePath(f) }}><FolderOpen size={16} /> Browse</Button>
+          </div>
+          <div className="flex items-end gap-2">
             <TextInput label="Bun Path" description="Custom path to bun executable (leave empty for auto-detection)" value={bunPath} onChange={setBunPath} placeholder="e.g. C:\Apps\bun\bin\bun.exe" className="flex-1" />
             <Button variant="secondary" onClick={async () => { const f = await window.api.dialog.openFile({ filters: [{ name: 'Executable', extensions: ['exe'] }] }); if (f) setBunPath(f) }}><FolderOpen size={16} /> Browse</Button>
           </div>
@@ -199,11 +203,76 @@ export default function SettingsPage(): JSX.Element {
         </div>
       </Card>
 
+      <Card title="Config Templates">
+        <div className="space-y-3">
+          <p className="text-xs text-themed-muted">Apply a preset configuration template to quickly set up OpenCode for your use case.</p>
+          <Button variant="secondary" onClick={async () => {
+            try {
+              const templates = await (window as any).api.template.list()
+              if (templates && templates.length > 0) {
+                const names = templates.map((t: any) => `${t.icon} ${t.name} — ${t.description}`).join('\n')
+                alert(`Available Templates:\n\n${names}\n\nUse the Dashboard "Create Config" flow to apply templates.`)
+              }
+            } catch { /* ignore */ }
+          }}>
+            <Layers size={16} /> View Templates
+          </Button>
+        </div>
+      </Card>
+
+      <Card title="Export / Import Bundle">
+        <div className="space-y-4">
+          <p className="text-xs text-themed-muted">Export all your settings, configs, skills, and MCP setup as a single bundle file. Import on another machine to replicate your setup.</p>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={async () => {
+              try {
+                const savePath = await (window as any).api.dialog.saveFile({ filters: [{ name: 'Bundle', extensions: ['zip'] }], defaultPath: 'opencode-bundle.zip' })
+                if (!savePath) return
+                const result = await (window as any).api.bundle.export({
+                  outputPath: savePath,
+                  includeSettings: true,
+                  includeOpenCodeConfig: true,
+                  includeAgentConfig: true,
+                  includeSkills: true,
+                  includeMcpConfig: true,
+                  appSettings: useSettingsStore.getState()
+                })
+                if (result.success) {
+                  alert(`Bundle exported successfully!\n${result.message}`)
+                } else {
+                  alert(`Export failed: ${result.message}`)
+                }
+              } catch (e: unknown) {
+                alert(`Export error: ${e instanceof Error ? e.message : 'unknown'}`)
+              }
+            }}>
+              <Upload size={16} /> Export Bundle
+            </Button>
+            <Button variant="secondary" onClick={async () => {
+              try {
+                const filePath = await (window as any).api.dialog.openFile({ filters: [{ name: 'Bundle', extensions: ['zip'] }] })
+                if (!filePath) return
+                const result = await (window as any).api.bundle.import(filePath)
+                if (result.success) {
+                  alert(`Bundle imported!\n${result.message}\n\nImported: ${result.imported.join(', ')}${result.errors.length ? '\n\nErrors: ' + result.errors.join(', ') : ''}`)
+                } else {
+                  alert(`Import failed: ${result.message}`)
+                }
+              } catch (e: unknown) {
+                alert(`Import error: ${e instanceof Error ? e.message : 'unknown'}`)
+              }
+            }}>
+              <Download size={16} /> Import Bundle
+            </Button>
+          </div>
+        </div>
+      </Card>
+
       <Card title="About">
         <div className="space-y-3">
           <div className="flex items-center justify-between py-1">
             <span className="text-sm text-themed-secondary">App Version</span>
-            <span className="text-sm text-themed">1.0.0</span>
+            <span className="text-sm text-themed">1.2.0</span>
           </div>
           <div className="flex items-center justify-between py-1">
             <span className="text-sm text-themed-secondary">Electron</span>

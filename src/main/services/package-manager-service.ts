@@ -69,7 +69,18 @@ export async function getPreferredPackageManager(): Promise<'bun' | 'npm'> {
   return bun ? 'bun' : 'npm'
 }
 
-export async function detectOpenCode(): Promise<DetectResult> {
+export async function detectOpenCode(customPath?: string): Promise<DetectResult> {
+  // 0. Try user-specified custom path first
+  if (customPath) {
+    try {
+      await access(customPath)
+      const version = await runCommand(customPath, ['--version'], undefined, 5000)
+      if (version.exitCode === 0) {
+        return { found: true, path: customPath, version: version.stdout.trim() }
+      }
+    } catch { /* custom path invalid */ }
+  }
+
   // 1. Try PATH first (global npm/bun install)
   try {
     const version = await runCommand('opencode', ['--version'], undefined, 5000)

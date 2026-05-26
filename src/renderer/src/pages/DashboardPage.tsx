@@ -38,7 +38,7 @@ export default function DashboardPage(): JSX.Element {
   const { openCodeConfig, configPath } = useConfigStore()
   const { plugins } = usePluginStore()
   const { skills } = useSkillStore()
-  const { recentProjects, openCodeWebPort, setOpenCodeWebPort } = useSettingsStore()
+  const { recentProjects, openCodeWebPort, setOpenCodeWebPort, customOpenCodePath } = useSettingsStore()
   const [pmInfo, setPmInfo] = useState<{ preferred: string; version: string } | null>(null)
   const [backupMode, setBackupMode] = useState<'backup' | 'restore' | null>(null)
   const { toggleTerminal } = useUiStore()
@@ -182,8 +182,8 @@ export default function DashboardPage(): JSX.Element {
 
   async function detectOpenCode(): Promise<void> {
     try {
-      const result = await window.api.pm.detectOpenCode() as any
-      setOcStatus({ found: !!result.installed, version: result.version || '' })
+      const result = await window.api.pm.detectOpenCode(customOpenCodePath || undefined) as any
+      setOcStatus({ found: !!result.found, version: result.version || '' })
     } catch {
       setOcStatus({ found: false, version: '' })
     }

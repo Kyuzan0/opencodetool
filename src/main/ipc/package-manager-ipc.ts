@@ -60,9 +60,9 @@ export function registerPackageManagerIpc(): void {
     }
   })
 
-  ipcMain.handle('pm:detect-opencode', async () => {
+  ipcMain.handle('pm:detect-opencode', async (_event, customPath?: string) => {
     try {
-      return detectOpenCode()
+      return detectOpenCode(customPath)
     } catch (e: unknown) {
       return ipcError('pm:detect-opencode', e)
     }

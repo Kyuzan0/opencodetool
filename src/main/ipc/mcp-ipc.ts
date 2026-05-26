@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { getTrendingMcps, getInstalledMcps, installMcp, uninstallMcp, toggleMcp, getPluginMcps, togglePluginMcp } from '../services/mcp-service'
+import { getTrendingMcps, getInstalledMcps, installMcp, uninstallMcp, toggleMcp, getPluginMcps, togglePluginMcp, checkAllMcpHealth } from '../services/mcp-service'
 
 function ipcError(channel: string, e: unknown): { error: true; message: string } {
   const message = e instanceof Error ? e.message : String(e)
@@ -82,4 +82,12 @@ export function registerMcpIpc(): void {
       }
     }
   )
+
+  ipcMain.handle('mcp:health-check', async (_event, configPath: string) => {
+    try {
+      return await checkAllMcpHealth(configPath)
+    } catch (e: unknown) {
+      return ipcError('mcp:health-check', e)
+    }
+  })
 }

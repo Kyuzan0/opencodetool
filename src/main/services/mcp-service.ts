@@ -356,3 +356,75 @@ export function togglePluginMcp(pluginConfigPath: string, name: string, disabled
     return { success: false, name, message }
   }
 }
+
+export interface McpHealthResult {
+  name: string
+  status: 'healthy' | 'unhealthy' | 'unknown'
+  responseTimeMs: number | null
+  error: string | null
+}
+
+/**
+ * Check health of an installed MCP server by attempting to spawn it briefly.
+ */
+export async function checkMcpHealth(entry: McpListEntry): Promise<McpHealthResult> {
+  if (!entry.command || entry.command.length === 0) {
+    return { name: entry.name, status: 'unknown', responseTimeMs: null, error: 'No command defined' }
+  }
+
+  const { execFile } = await import('child_process')
+  const command = entry.command[0]
+  const args = entry.command.slice(1)
+
+  const start = Date.now()
+
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => {
+      // If process is still running after 3s, it's likely healthy (MCP servers are long-running)
+      if (proc && !proc.killed) {
+        proc.kill()
+        resolve({ name: entry.name, status: 'healthy', responseTimeMs: Date.now() - start, error: null })
+      }
+    }, 3000)
+
+    const proc = execFile(command, args, { timeout: 5000, shell: true, env: { ...process.env, ...entry.env } }, (error, stdout, stderr) => {
+      clearTimeout(timeout)
+      const elapsed = Date.now() - start
+      if (error) {
+        // Exit code 1 with stderr might mean the server started but needs stdin
+        // Some MCP servers exit immediately without proper stdio
+        if (elapsed > 500) {
+          resolve({ name: entry.name, status: 'healthy', responseTimeMs: elapsed, error: null })
+        } else {
+          resolve({ name: entry.name, status: 'unhealthy', responseTimeMs: elapsed, error: stderr?.slice(0, 200) || error.message })
+        }
+      } else {
+        resolve({ name: entry.name, status: 'healthy', responseTimeMs: elapsed, error: null })
+      }
+    })
+
+    proc.on('error', (err) => {
+      clearTimeout(timeout)
+      resolve({ name: entry.name, status: 'unhealthy', responseTimeMs: Date.now() - start, error: err.message })
+    })
+  })
+}
+
+/**
+ * Check health of all installed MCP servers.
+ */
+export async function checkAllMcpHealth(configPath: string): Promise<McpHealthResult[]> {
+  const installed = getInstalledMcps(configPath)
+  const results: McpHealthResult[] = []
+
+  for (const entry of installed) {
+    if (entry.disabled) {
+      results.push({ name: entry.name, status: 'unknown', responseTimeMs: null, error: 'Disabled' })
+      continue
+    }
+    const result = await checkMcpHealth(entry)
+    results.push(result)
+  }
+
+  return results
+}

@@ -10,6 +10,7 @@ interface SettingsState {
   bunPath: string
   autoBackup: boolean
   openCodeWebPort: string
+  customOpenCodePath: string
 }
 
 interface SettingsActions {
@@ -22,6 +23,7 @@ interface SettingsActions {
   setBunPath: (path: string) => void
   setAutoBackup: (enabled: boolean) => void
   setOpenCodeWebPort: (port: string) => void
+  setCustomOpenCodePath: (path: string) => void
 }
 
 export const useSettingsStore = create<SettingsState & SettingsActions>()(
@@ -35,6 +37,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       bunPath: '',
       autoBackup: true,
       openCodeWebPort: '3000',
+      customOpenCodePath: '',
 
       setTheme: (theme) => set({ theme }),
       setLanguage: (lang) => set({ language: lang }),
@@ -48,7 +51,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       setPreferredShell: (shell) => set({ preferredShell: shell }),
       setBunPath: (path) => set({ bunPath: path }),
       setAutoBackup: (enabled) => set({ autoBackup: enabled }),
-      setOpenCodeWebPort: (port) => set({ openCodeWebPort: port })
+      setOpenCodeWebPort: (port) => set({ openCodeWebPort: port }),
+      setCustomOpenCodePath: (path) => set({ customOpenCodePath: path })
     }),
     { name: 'opencode-manager-settings' }
   )
