@@ -4,7 +4,7 @@ import {
   Tabs, Card, TextInput, SelectInput, ToggleSwitch,
   KeyValueEditor, ArrayEditor, JsonEditor, Button, Modal
 } from '../components/ui'
-import { Save, RefreshCw, Upload, Download, Plus, Trash2, ExternalLink, FilePlus } from 'lucide-react'
+import { Save, RefreshCw, Upload, Download, Plus, Trash2, ExternalLink, FilePlus, DownloadCloud, Check } from 'lucide-react'
 import type { OpenCodeConfig } from '@shared/types'
 import { PERMISSION_KEYS } from '@shared/types'
 
@@ -46,6 +46,12 @@ export default function OpenCodeConfigPage(): JSX.Element {
   const watchedPathRef = useRef<string | null>(null)
   const [confirmDeleteProvider, setConfirmDeleteProvider] = useState<string | null>(null)
   const [confirmDeleteModel, setConfirmDeleteModel] = useState<string | null>(null)
+  const [fetchModelsOpen, setFetchModelsOpen] = useState(false)
+  const [fetchModelsLoading, setFetchModelsLoading] = useState(false)
+  const [fetchModelsError, setFetchModelsError] = useState('')
+  const [fetchedModels, setFetchedModels] = useState<{ id: string; name?: string }[]>([])
+  const [selectedFetchedModels, setSelectedFetchedModels] = useState<Set<string>>(new Set())
+  const [fetchProviderName, setFetchProviderName] = useState('')
 
   // File watcher: detect external changes
   useEffect(() => {
@@ -246,6 +252,67 @@ export default function OpenCodeConfigPage(): JSX.Element {
     upf(selProv, 'models', rest)
   }
 
+  async function handleFetchModels(provName: string): Promise<void> {
+    const prov = openCodeConfig?.provider?.[provName]
+    if (!prov) return
+
+    const baseURL = prov.options?.baseURL || ''
+    const apiKey = prov.options?.apiKey || ''
+
+    if (!baseURL) {
+      setFetchModelsError('Base URL harus diisi terlebih dahulu')
+      setFetchModelsOpen(true)
+      setFetchProviderName(provName)
+      setFetchedModels([])
+      return
+    }
+
+    setFetchProviderName(provName)
+    setFetchModelsOpen(true)
+    setFetchModelsLoading(true)
+    setFetchModelsError('')
+    setFetchedModels([])
+    setSelectedFetchedModels(new Set())
+
+    try {
+      const result = await window.api.provider.fetchModels(baseURL, apiKey)
+      if (result.error) {
+        setFetchModelsError(result.error)
+      } else if (result.models) {
+        setFetchedModels(result.models)
+        // Pre-select models that aren't already configured
+        const existing = Object.keys(openCodeConfig?.provider?.[provName]?.models || {})
+        const toSelect = new Set(result.models.filter((m: { id: string; name?: string }) => !existing.includes(m.id)).map((m: { id: string; name?: string }) => m.id))
+        setSelectedFetchedModels(toSelect as Set<string>)
+      }
+    } catch (e: unknown) {
+      setFetchModelsError(e instanceof Error ? e.message : 'Gagal mengambil model')
+    } finally {
+      setFetchModelsLoading(false)
+    }
+  }
+
+  function handleAddFetchedModels(): void {
+    if (!fetchProviderName || !openCodeConfig?.provider?.[fetchProviderName]) return
+    const prov = openCodeConfig.provider[fetchProviderName]
+    const existing = prov.models || {}
+    const newModels = { ...existing }
+
+    for (const modelId of selectedFetchedModels) {
+      if (!newModels[modelId]) {
+        const fetched = fetchedModels.find(m => m.id === modelId)
+        newModels[modelId] = {
+          name: fetched?.name || modelId,
+          limit: { context: 200000, output: 16000 }
+        }
+      }
+    }
+
+    upf(fetchProviderName, 'models', newModels)
+    setDirty(true)
+    setFetchModelsOpen(false)
+  }
+
   function umf(mk: string, field: string, val: unknown): void {
     if (!selProv || !openCodeConfig?.provider?.[selProv]?.models?.[mk]) return
     const p = openCodeConfig.provider[selProv]
@@ -340,7 +407,8 @@ export default function OpenCodeConfigPage(): JSX.Element {
                       upf(name, 'options', base)
                     }}
                   />
-                  <div className="pt-2 border-t border-[var(--color-border-subtle)]">
+                  <div className="flex items-center gap-2 pt-2 border-t border-[var(--color-border-subtle)]">
+                    <Button variant="secondary" onClick={() => handleFetchModels(name)}><DownloadCloud size={14} /> Fetch Models</Button>
                     <Button variant="danger" onClick={() => setConfirmDeleteProvider(name)}><Trash2 size={14} /> Remove Provider</Button>
                   </div>
                 </div>
@@ -459,6 +527,90 @@ export default function OpenCodeConfigPage(): JSX.Element {
         }
       >
         <p className="text-sm text-themed-secondary">Are you sure you want to remove model <strong className="text-themed">{confirmDeleteModel}</strong>?</p>
+      </Modal>
+
+      {/* Fetch Models Modal */}
+      <Modal
+        open={fetchModelsOpen}
+        onClose={() => setFetchModelsOpen(false)}
+        title={`Fetch Models — ${fetchProviderName}`}
+        className="max-w-xl"
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setFetchModelsOpen(false)}>Cancel</Button>
+            <Button onClick={handleAddFetchedModels} disabled={fetchModelsLoading || selectedFetchedModels.size === 0}>
+              <Check size={14} /> Add {selectedFetchedModels.size > 0 ? `${selectedFetchedModels.size} ` : ''}Model{selectedFetchedModels.size !== 1 ? 's' : ''}
+            </Button>
+          </>
+        }
+      >
+        {fetchModelsLoading && (
+          <div className="flex items-center justify-center py-8 gap-2 text-themed-muted">
+            <RefreshCw size={16} className="animate-spin" />
+            <span className="text-sm">Mengambil daftar model...</span>
+          </div>
+        )}
+        {fetchModelsError && (
+          <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+            {fetchModelsError}
+          </div>
+        )}
+        {!fetchModelsLoading && !fetchModelsError && fetchedModels.length === 0 && (
+          <p className="text-sm text-themed-muted py-4 text-center">Tidak ada model ditemukan.</p>
+        )}
+        {!fetchModelsLoading && fetchedModels.length > 0 && (
+          <div className="space-y-1">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-themed-muted">{fetchedModels.length} model ditemukan</span>
+              <button
+                className="text-xs text-accent hover:underline"
+                onClick={() => {
+                  const allIds = new Set(fetchedModels.map(m => m.id))
+                  setSelectedFetchedModels(prev => prev.size === allIds.size ? new Set() : allIds)
+                }}
+              >
+                {selectedFetchedModels.size === fetchedModels.length ? 'Deselect All' : 'Select All'}
+              </button>
+            </div>
+            {fetchedModels.map((model) => {
+              const alreadyExists = !!openCodeConfig?.provider?.[fetchProviderName]?.models?.[model.id]
+              return (
+                <label
+                  key={model.id}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors cursor-pointer ${
+                    alreadyExists
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:bg-secondary'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="rounded border-border-default text-accent focus:ring-accent/40"
+                    checked={selectedFetchedModels.has(model.id)}
+                    disabled={alreadyExists}
+                    onChange={() => {
+                      setSelectedFetchedModels(prev => {
+                        const next = new Set(prev)
+                        if (next.has(model.id)) next.delete(model.id)
+                        else next.add(model.id)
+                        return next
+                      })
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-mono text-themed block truncate">{model.id}</span>
+                    {model.name && model.name !== model.id && (
+                      <span className="text-xs text-themed-muted">{model.name}</span>
+                    )}
+                  </div>
+                  {alreadyExists && (
+                    <span className="text-xs text-themed-muted shrink-0">sudah ada</span>
+                  )}
+                </label>
+              )
+            })}
+          </div>
+        )}
       </Modal>
     </div>
   )

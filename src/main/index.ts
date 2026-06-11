@@ -18,6 +18,7 @@ import { registerDiagnosticsIpc } from './ipc/diagnostics-ipc'
 import { registerLogViewerIpc } from './ipc/log-viewer-ipc'
 import { registerTemplateIpc } from './ipc/template-ipc'
 import { registerBundleIpc } from './ipc/bundle-ipc'
+import { registerProviderModelsIpc } from './ipc/provider-models-ipc'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -143,6 +144,7 @@ app.whenReady().then(() => {
   registerLogViewerIpc()
   registerTemplateIpc()
   registerBundleIpc()
+  registerProviderModelsIpc()
 
   // Create menu
   createMenu()

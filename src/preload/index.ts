@@ -142,6 +142,9 @@ const api = {
     export: (options: Record<string, unknown>) => ipcRenderer.invoke('bundle:export', options),
     import: (zipPath: string, targetDir?: string) => ipcRenderer.invoke('bundle:import', zipPath, targetDir),
     preview: (zipPath: string) => ipcRenderer.invoke('bundle:preview', zipPath)
+  },
+  provider: {
+    fetchModels: (baseURL: string, apiKey?: string) => ipcRenderer.invoke('provider:fetch-models', { baseURL, apiKey })
   }
 }
 

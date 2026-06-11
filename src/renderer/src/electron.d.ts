@@ -128,6 +128,9 @@ export interface ElectronAPI {
     onDownloadProgress: (callback: (progress: UpdateDownloadProgress) => void) => void
     removeListeners: () => void
   }
+  provider: {
+    fetchModels: (baseURL: string, apiKey?: string) => Promise<{ error?: string; models?: Array<{ id: string; name?: string }> }>
+  }
 }
 
 export interface ElectronWindow {
